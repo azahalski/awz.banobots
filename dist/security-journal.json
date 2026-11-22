@@ -101,6 +101,23 @@
         "reopened_findings": 0,
         "resolved_since_previous_run": 3
       }
+    },
+    {
+      "run_id": "awz.banobots-1795376955",
+      "created_at": "2026-11-22T20:04:55+00:00",
+      "archive_sha256": null,
+      "scanner_request_id": "awz.banobots-1795376955",
+      "input_summary": "Повторное сканирование awz.banobots 1.0.5: 1 находка (low) при анализе всех 56 целевых файлов модуля (языковые файлы — только справочники $MESS). Прежняя находка IDOR/прав в admin/ban_list.php (1.0.4) НЕ воспроизводится: возвращена проверка AccessController::isViewRight() (ban_list.php:15-18) с AuthForm; трассировка доведена до конца — isViewRight (accesscontroller.php:57-61) → AccessController::can → RuleFactory → Permission\\Rules\\RightView (rules/rightview.php:9-20): аноним отклоняется (CurrentUser->getId() пуст → false в accesscontroller.php:58-59), неадмин проходит только при наличии роли с PERMISSION_ID=98 в awz_banobots_permission через UserModel::getPermissions (model/usermodel.php:44-77). Дополнительно групповые операции удаления в списке гейтируются $POST_RIGHT=='W' (awz.admin ilist.php:259-302), который на странице не устанавливается, — операции записи недоступны пользователям с правом только на просмотр. Прежнее XSS-подозрение (USER_AGENT/PAGE/REFERER в таблице банов) снято: значения пишутся после sanitizeLogValue (handlers.php:370-378), а вывод идёт через внешний awz.admin IList → \\CAdminUiList::AddRow (awz.admin lib/ilist.php:166), рендер значений выполняет ядро Bitrix (CAdminUiListRow/AddViewField с htmlspecialcharsex) — пользовательские <script> из UA/Referer экранируются. Отклонены сигналы recon: 'Sink: OS command' в model/usermodel.php:25,59 — это ORM Query->exec(), не shell; 'Regex injection' handlers.php:38 — паттерн собирается из preg_quote (handlers.php:37); 'Sink: code exec' options.php:301 / handlers.php:279 — строки-литералы дефолтных настроек; include/require — фиксированные пути; LocalRedirect (options.php:73,88) — на собственный $saveUrl. Новая находка: логи заблокированных запросов (IP/UA/PAGE/REFERER) могут писаться в document_root по предсказуемому пути (low, hardening, требует прав SETT_EDIT). Находок уровня high/medium не обнаружено.",
+      "summary": {
+        "current_scan_findings": 1,
+        "severity_counts": {
+          "low": 1
+        },
+        "new_findings": 0,
+        "still_open_findings": 1,
+        "reopened_findings": 0,
+        "resolved_since_previous_run": 0
+      }
     }
   ],
   "findings": [
@@ -703,8 +720,8 @@
         "partner_disposition": {
           "status": "accepted_risk",
           "note": "",
-          "author": "",
-          "updated_at": "2026-11-22T19:51:02+00:00"
+          "author": "Andrew Zahalski",
+          "updated_at": "2026-11-22T20:05:24+00:00"
         }
       },
       "events": [
@@ -725,6 +742,24 @@
           "status": "accepted_risk",
           "note": "",
           "author": ""
+        },
+        {
+          "run_id": "awz.banobots-1795376955",
+          "event": "detected_again",
+          "at": "2026-11-22T20:04:55+00:00",
+          "location": {
+            "file": "lib/handlers.php",
+            "line": "89-115,155-168,312-313,343-344"
+          },
+          "status": "accepted_risk"
+        },
+        {
+          "run_id": "awz.banobots-1795376955",
+          "event": "partner_disposition_updated",
+          "at": "2026-11-22T20:05:24+00:00",
+          "status": "accepted_risk",
+          "note": "",
+          "author": "Andrew Zahalski"
         }
       ]
     }
