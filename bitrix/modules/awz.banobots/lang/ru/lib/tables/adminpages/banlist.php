@@ -1,2 +1,2 @@
 <?php
-$MESS['AWZ_BANOBOTS_S_BAN_LIST_TITLE'] = 'Мой список';
+$MESS['AWZ_BANOBOTS_S_BAN_LIST_TITLE'] = 'Список блокировок';
