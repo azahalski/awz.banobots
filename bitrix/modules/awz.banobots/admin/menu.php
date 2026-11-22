@@ -23,6 +23,10 @@ if(AccessController::isViewSettings() || AccessController::isViewRight()){
             "url" => "javascript:BX.SidePanel.Instance.open('/bitrix/admin/settings.php?mid=".$module_id."&lang=".LANGUAGE_ID."&mid_menu=1');"
         ];
     }
+    $level2[] = [
+        "text" => Loc::getMessage('AWZ_ADMIN_MENU_NAME_BAN_LIST'),
+        "url" => "awz_banobots_ban_list.php?lang=".LANGUAGE_ID
+    ];
     $items[] = [
         "text" => Loc::getMessage('AWZ_ADMIN_MENU_NAME_SETT'),
         "items_id" => str_replace('.','_',$module_id).'_sett',

@@ -88,6 +88,9 @@ class awz_banobots extends CModule
         if(!$this->errors && !$DB->TableExists(implode('_', explode('.',$this->MODULE_ID)).'_permission')) {
             $this->errors = $DB->RunSQLBatch($_SERVER['DOCUMENT_ROOT'] . "/bitrix/modules/" . $this->MODULE_ID . "/install/db/".$connection->getType()."/access.sql");
         }
+        if(!$this->errors && !$DB->TableExists(implode('_', explode('.',$this->MODULE_ID)).'_ban')) {
+            $this->errors = $DB->RunSQLBatch($_SERVER['DOCUMENT_ROOT'] . "/bitrix/modules/" . $this->MODULE_ID . "/install/db/".$connection->getType()."/ban.sql");
+        }
         if (!$this->errors) {
             return true;
         } else {
@@ -103,6 +106,11 @@ class awz_banobots extends CModule
         $this->errors = false;
         if (!$this->errors) {
             $this->errors = $DB->RunSQLBatch($_SERVER['DOCUMENT_ROOT'] . "/bitrix/modules/" . $this->MODULE_ID . "/install/db/" . $connection->getType() . "/unaccess.sql");
+        }
+        if (!$this->errors) {
+            if ($connection->isTableExists('awz_banobots_ban')) {
+                $connection->dropTable('awz_banobots_ban');
+            }
         }
         if (!$this->errors) {
             return true;
@@ -156,12 +164,18 @@ class awz_banobots extends CModule
             $_SERVER['DOCUMENT_ROOT']."/bitrix/components/awz/banobots.config.permissions",
             true, true
         );
+        CopyDirFiles(
+            $_SERVER['DOCUMENT_ROOT']."/bitrix/modules/".$this->MODULE_ID."/install/admin/",
+            $_SERVER['DOCUMENT_ROOT']."/bitrix/admin",
+            true, true
+        );
         return true;
     }
 
     function UnInstallFiles()
     {
         DeleteDirFilesEx("/bitrix/components/awz/banobots.config.permissions");
+        DeleteDirFilesEx("/bitrix/admin/awz_banobots_ban_list.php");
         return true;
     }
 
