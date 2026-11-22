@@ -54,6 +54,11 @@ $aTabs[] = array(
 $saveUrl = $APPLICATION->GetCurPage(false).'?mid='.htmlspecialcharsbx($module_id).'&lang='.LANGUAGE_ID.'&mid_menu=1';
 $tabControl = new CAdminTabControl("tabControl", $aTabs);
 
+if ($request->getRequestMethod()==='POST' && AccessController::isEditSettings() && ($request->get('ClearBans') || $request->get('Update')))
+{
+    check_bitrix_sessid();
+}
+
 if ($request->getRequestMethod()==='POST' && AccessController::isEditSettings() && $request->get('ClearBans'))
 {
     try {
@@ -332,6 +337,7 @@ $tabControl->Begin();
         ?>
         <input <?if (!AccessController::isEditSettings()) echo "disabled" ?> type="submit" class="adm-btn-green" name="Update" value="<?=Loc::getMessage('AWZ_BANOBOTS_OPT_L_BTN_SAVE')?>" />
         <input type="hidden" name="Update" value="Y" />
+        <?=bitrix_sessid_post()?>
         <input <?if (!AccessController::isEditSettings()) echo "disabled" ?> type="submit" class="adm-btn" name="ClearBans" value="<?=Loc::getMessage('AWZ_BANOBOTS_OPT_CLEAR_BANS')?>" onclick="return confirm('<?=CUtil::JSEscape(Loc::getMessage('AWZ_BANOBOTS_OPT_CLEAR_BANS_CONFIRM'))?>');" />
         <input type="hidden" name="ClearBans" value="" />
         <?if(AccessController::isViewRight()){?>

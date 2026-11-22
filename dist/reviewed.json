@@ -1,0 +1,82 @@
+{
+  "success": true,
+  "requestId": "awz.banobots-1795373116",
+  "data": {
+    "vulnerabilities": [],
+    "summary": "Повторный скан модуля awz.banobots (v1.0.2) после исправлений. Проанализировано 43 PHP-файла из 56 целевых (остальные — lang-файлы локализации). Все три ранее найденные уязвимости исправлены и не воспроизводятся: 1) CSRF в options.php — POST-обработка (ClearBans/Update) защищена check_bitrix_sessid() (options.php:59) и AccessController::isEditSettings() (options.php:57,62,72); 2) Path Traversal в appendLog (lib/handlers.php:79-102) — относительные пути логов привязываются к DOCUMENT_ROOT (строки 146-149), абсолютные пути доступны только администратору с правом SETT_EDIT через защищённый options.php; 3) ReDoS в maskMatch (lib/handlers.php:33-48) — паттерн обрезается до 255 символов и прогоняется через preg_quote с фиксированным разделителем / (строка 41), звёздочка обрабатывается явно, модификаторы атакующим не управляются. Сигналы recon отклонены осознанно: Sink: OS command (lib/access/model/usermodel.php:25,59) — ORM-метод exec() объекта Result запроса Bitrix ORM, а не shell-exec; Regex injection (lib/handlers.php:42) — паттерн строится только из preg_quote-значений, интерфейса для сырого паттерна нет; Sink: include/require — фиксированные пути prolog/epilog Bitrix; Sink: SQL (lib/access/handlers.php:15-31) — все значения приведены через (int) перед конкатенацией; Sink: code exec (options.php:296, lib/handlers.php:266) — текстовые дефолты-подсказки в textarea, не исполняемый код; Open Redirect (options.php:69,84) — LocalRedirect на saveUrl из GetCurPage() и констант, ввод запроса не участвует; Sink: file ops — appendLog работает только с путями из админских опций (SETT_EDIT). Контроллер прав (install/components/banobots.config.permissions/ajax.php) защищён Authentication + HttpMethod(POST) + Csrf и проверкой AccessController::can в processBeforeAction. Обработчик OnAfterUserUpdate пишет в b_user_access только int-значения. Уязвимостей не обнаружено.",
+    "scannedFiles": 56,
+    "riskLevel": "none",
+    "auditedFiles": [
+      ".settings.php",
+      "include.php",
+      "options.php",
+      "updater.php",
+      "admin/ban_list.php",
+      "admin/check_awz_admin.php",
+      "admin/menu.php",
+      "install/index.php",
+      "install/solution.php",
+      "install/unstep.php",
+      "install/version.php",
+      "install/admin/awz_banobots_ban_list.php",
+      "install/components/banobots.config.permissions/ajax.php",
+      "lib/handlers.php",
+      "lib/access/accesscontroller.php",
+      "lib/access/handlers.php",
+      "lib/access/component/configpermissions.php",
+      "lib/access/custom/actiondictionary.php",
+      "lib/access/custom/componentconfig.php",
+      "lib/access/custom/helper.php",
+      "lib/access/custom/permissiondictionary.php",
+      "lib/access/custom/roledictionary.php",
+      "lib/access/custom/rules/example.php",
+      "lib/access/entity/user.php",
+      "lib/access/entityselectors/group.php",
+      "lib/access/entityselectors/user.php",
+      "lib/access/include/moduleright.php",
+      "lib/access/model/basemodel.php",
+      "lib/access/model/usermodel.php",
+      "lib/access/permission/actiondictionary.php",
+      "lib/access/permission/permissiondictionary.php",
+      "lib/access/permission/roledictionary.php",
+      "lib/access/permission/rulefactory.php",
+      "lib/access/permission/roleutil.php",
+      "lib/access/permission/rules/rightedit.php",
+      "lib/access/permission/rules/rightview.php",
+      "lib/access/permission/rules/settedit.php",
+      "lib/access/permission/rules/settview.php",
+      "lib/access/tables/permission.php",
+      "lib/access/tables/role.php",
+      "lib/access/tables/rolerelation.php",
+      "lib/tables/ban.php",
+      "lib/tables/adminpages/banlist.php"
+    ],
+    "reviewSummary": {
+      "reviewedAt": "2026-11-22",
+      "method": "BUS-aware triage: preserve original finding fields except severity, add reviewed node with old severity and rationale.",
+      "totals": {
+        "vulnerabilities": 0,
+        "changedSeverity": 0,
+        "unchangedSeverity": 0
+      },
+      "rawSeverityCounts": {},
+      "reviewedSeverityCounts": {},
+      "currentScope": {
+        "total": 0,
+        "rawSeverityCounts": {},
+        "reviewedSeverityCounts": {},
+        "reviewedCategories": {}
+      },
+      "historicalUpdatePackages": {
+        "total": 0,
+        "rawSeverityCounts": {},
+        "reviewedSeverityCounts": {},
+        "reviewedCategories": {}
+      },
+      "caveats": [
+        "Type, file, line, description, recommendation and fix are preserved from the source journal.",
+        "Severity is replaced with reviewed triage severity."
+      ]
+    }
+  }
+}

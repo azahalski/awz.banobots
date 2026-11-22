@@ -20,7 +20,10 @@ class Handlers
             foreach (explode(',', $line) as $item) {
                 $item = trim((string)$item);
                 if ($item !== '') {
-                    $ar[] = $item;
+                    $ar[] = mb_substr($item, 0, 255);
+                }
+                if (count($ar) >= 100) {
+                    return $ar;
                 }
             }
         }
@@ -31,6 +34,7 @@ class Handlers
     {
         $pattern = trim((string)$pattern);
         if ($pattern === '') return false;
+        $pattern = mb_substr($pattern, 0, 255);
         $subjectLower = mb_strtolower((string)$subject, 'UTF-8');
         $patternLower = mb_strtolower($pattern, 'UTF-8');
         if (strpos($pattern, '*') !== false) {

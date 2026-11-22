@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "module": {
+    "code": "awz.banobots"
+  },
+  "current_state": {
+    "status": "ready_for_submission",
+    "last_run_id": "awz.banobots-1795373116",
+    "archive_sha256": null,
+    "open_findings": 0,
+    "blocking_findings_open": 0,
+    "false_positive_findings": 0,
+    "accepted_risk_findings": 0,
+    "fixed_findings": 0,
+    "removed_findings": 0,
+    "total_findings": 0
+  },
+  "runs": [
+    {
+      "run_id": "awz.banobots-1795373116",
+      "created_at": "2026-11-22T18:49:27+00:00",
+      "archive_sha256": null,
+      "scanner_request_id": "awz.banobots-1795373116",
+      "input_summary": "Повторный скан модуля awz.banobots (v1.0.2) после исправлений. Проанализировано 43 PHP-файла из 56 целевых (остальные — lang-файлы локализации). Все три ранее найденные уязвимости исправлены и не воспроизводятся: 1) CSRF в options.php — POST-обработка (ClearBans/Update) защищена check_bitrix_sessid() (options.php:59) и AccessController::isEditSettings() (options.php:57,62,72); 2) Path Traversal в appendLog (lib/handlers.php:79-102) — относительные пути логов привязываются к DOCUMENT_ROOT (строки 146-149), абсолютные пути доступны только администратору с правом SETT_EDIT через защищённый options.php; 3) ReDoS в maskMatch (lib/handlers.php:33-48) — паттерн обрезается до 255 символов и прогоняется через preg_quote с фиксированным разделителем / (строка 41), звёздочка обрабатывается явно, модификаторы атакующим не управляются. Сигналы recon отклонены осознанно: Sink: OS command (lib/access/model/usermodel.php:25,59) — ORM-метод exec() объекта Result запроса Bitrix ORM, а не shell-exec; Regex injection (lib/handlers.php:42) — паттерн строится только из preg_quote-значений, интерфейса для сырого паттерна нет; Sink: include/require — фиксированные пути prolog/epilog Bitrix; Sink: SQL (lib/access/handlers.php:15-31) — все значения приведены через (int) перед конкатенацией; Sink: code exec (options.php:296, lib/handlers.php:266) — текстовые дефолты-подсказки в textarea, не исполняемый код; Open Redirect (options.php:69,84) — LocalRedirect на saveUrl из GetCurPage() и констант, ввод запроса не участвует; Sink: file ops — appendLog работает только с путями из админских опций (SETT_EDIT). Контроллер прав (install/components/banobots.config.permissions/ajax.php) защищён Authentication + HttpMethod(POST) + Csrf и проверкой AccessController::can в processBeforeAction. Обработчик OnAfterUserUpdate пишет в b_user_access только int-значения. Уязвимостей не обнаружено.",
+      "summary": {
+        "current_scan_findings": 0,
+        "severity_counts": {},
+        "new_findings": 0,
+        "still_open_findings": 0,
+        "reopened_findings": 0,
+        "resolved_since_previous_run": 0
+      }
+    }
+  ],
+  "findings": []
+}
