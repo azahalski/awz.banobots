@@ -195,7 +195,7 @@ $tabControl->Begin();
         <tr>
             <td><?=Loc::getMessage('AWZ_BANOBOTS_OPT_COUNTRY_ALLOW_LIST')?></td>
             <td>
-                <?$val = Option::get($module_id, "COUNTRY_ALLOW_LIST", "", "");?>
+                <?$val = trim((string)Option::get($module_id, "COUNTRY_ALLOW_LIST", "", "")); if($val==='') $val = "RU,BY,KZ,N0";?>
                 <input type="text" size="60" name="COUNTRY_ALLOW_LIST" value="<?=htmlspecialcharsbx($val)?>">
                 <div style="margin-top:5px;color:#666;"><?=Loc::getMessage('AWZ_BANOBOTS_OPT_COUNTRY_ALLOW_LIST_DESC')?></div>
             </td>

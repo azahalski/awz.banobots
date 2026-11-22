@@ -146,7 +146,7 @@ class Handlers
         }
 
         // Списки кодов стран через запятую
-        $allowListCountries = array_map('strtoupper', self::getOptionList('COUNTRY_ALLOW_LIST'));
+        $allowListCountries = array_map('strtoupper', self::getOptionList('COUNTRY_ALLOW_LIST', 'RU,BY,KZ,N0'));
         $denyListCountries = array_map('strtoupper', self::getOptionList('COUNTRY_DENY_LIST'));
 
         // Белый список IP (ваш IP, IP сервера, чтобы случайно не заблокировать себя)
