@@ -7,10 +7,10 @@
     "status": "needs_review",
     "last_run_id": "awz.banobots-1795376955",
     "archive_sha256": null,
-    "open_findings": 1,
+    "open_findings": 0,
     "blocking_findings_open": 0,
     "false_positive_findings": 0,
-    "accepted_risk_findings": 0,
+    "accepted_risk_findings": 1,
     "fixed_findings": 9,
     "removed_findings": 0,
     "total_findings": 10
@@ -668,7 +668,7 @@
       "fingerprint": "fe5229e4255460c6a04f2598ab49e7dc",
       "type": "Information Disclosure",
       "severity": "low",
-      "status": "open",
+      "status": "accepted_risk",
       "first_seen_run_id": "awz.banobots-1795376955",
       "last_seen_run_id": "awz.banobots-1795376955",
       "resolved_run_id": null,
@@ -699,6 +699,12 @@
           "action": "fix",
           "confidence": "medium",
           "rationale": "Severity left unchanged after review; no stronger Bitrix/BUS-specific downgrade condition was identified from the journal text alone."
+        },
+        "partner_disposition": {
+          "status": "accepted_risk",
+          "note": "",
+          "author": "",
+          "updated_at": "2026-11-22T19:51:02+00:00"
         }
       },
       "events": [
@@ -711,6 +717,14 @@
             "line": "89-115,155-168,312-313,343-344"
           },
           "status": "open"
+        },
+        {
+          "run_id": "awz.banobots-1795376955",
+          "event": "partner_disposition_updated",
+          "at": "2026-11-22T19:51:02+00:00",
+          "status": "accepted_risk",
+          "note": "",
+          "author": ""
         }
       ]
     }
