@@ -1,19 +1,19 @@
 {
   "success": true,
-  "requestId": "awz.banobots-1795376955",
+  "requestId": "awz.banobots-1795396260",
   "data": {
     "vulnerabilities": [
       {
-        "file": "lib/handlers.php",
-        "line": "89-115,155-168,312-313,343-344",
+        "file": "admin/ban_list.php",
+        "line": "1-31",
         "type": "Information Disclosure",
-        "severity": "low",
-        "description": "Подтверждена (hardening, требует привилегий): администратор с правом SETT_EDIT может в настройках модуля (options.php:76-89, опции LOG_FILE_BAN / LOG_FILE_BOTS / LOG_FILE_COUNTRY) задать относительный путь лога (например log.txt). В autoBanByCountryAllowList (строки 156-168) относительный путь дополняется DOCUMENT_ROOT, недостающие каталоги создаются через @mkdir, и далее appendLog (89-115) пишет туда file_put_contents данные о заблокированных запросах: IP, User-Agent, PAGE (REQUEST_URI), REFERER, код страны (строки 312-313, 343-344). Файл оказывается в document_root по предсказуемому пути и скачивается любым неавторизованным посетителем как статика (Apache по умолчанию отдаёт .txt/.log), раскрывая IP посетителей, их User-Agent и историю запрашиваемых URL. Смягчающие факторы: путь задаёт только привилегированный оператор модуля; isAllowedLogFile (75-80) ограничивает расширения .txt/.log (исключает запись исполняемых файлов); sanitizeLogValue (82-87) удаляет переводы строк, control-символы и кавычки (защита от log injection и log-based XSS); есть ротация по размеру (97-114). Также appendLog принимает абсолютные пути (проверка на '/' и диск 'X:/' в 159-167) — данные можно направить в произвольный каталог сервера, но содержимое ограничено лог-форматом.",
-        "recommendation": "Хранить логи вне document_root либо в каталоге /upload/ с закрытой отдачей (.htaccess 'Deny from all' / правило nginx), генерировать непредсказуемое имя файла по умолчанию, ограничить глубину относительного пути (запрет '..'), документировать риск в описании опции. Минимум — при сохранении настроек предупреждать, если путь разрешается внутрь DOCUMENT_ROOT.",
-        "fix": "Before:\n$logPath = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\\\') . '/' . ltrim($logPath, '/\\\\');\n\nAfter:\n$logPath = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\\\') . '/' . ltrim($logPath, '/\\\\');\n$docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\\\');\n$realBase = str_replace('\\\\', '/', realpath($docRoot));\n$realDir = str_replace('\\\\', '/', realpath(dirname($logPath)));\nif ($realDir !== false && $realBase !== false && strpos($realDir, $realBase) === 0) {\n    // путь внутри document_root: отказ или перевод в защищённый каталог\n    return;\n}\n// либо использовать каталог вне web-root по умолчанию:\n// $logPath = $_SERVER['DOCUMENT_ROOT'] . '/../awz_banobots_logs/' . basename($logPath);\n// + выкладывать в каталог .htaccess 'Require all denied'",
+        "severity": "medium",
+        "description": "Подтверждено: административная страница списка блокировок не проверяет права доступа к модулю awz.banobots. Файл подключает prolog_admin_before.php (требует только факта авторизации в админзоне /bitrix/admin/) и включает check_awz_admin.php:9-44, который лишь проверяет установку модуля awz.admin через Loader::includeModule('awz.admin') и НЕ проверяет права пользователя на работу с баноботами. Любое лицо, авторизованное в админ-панели Bitrix без специфического права на awz.banobots (например, обычный зарегистрированный пользователь сайта), открывает /bitrix/admin/awz_banobots_ban_list.php и видит полный список блокировок: IP-адреса посетителей, User-Agent, посещённые страницы (PAGE), REFERER и даты — данные всех посетителей сайта, включая не забаненных ранее. Записи рендерятся через внешний awz.admin IList → CAdminUiList::AddRow (экранирование на стороне списка), stored XSS не подтверждается; проблема — именно чтение чувствительных данных. Групповые операции удаления/редактирования гейтируются $POST_RIGHT=='W', который на странице не установлен (lib/ilist.php:262 в awz.admin), поэтому эксплуатация ограничена чтением. Меню admin/menu.php скрывает пункт меню по правам AccessController::isViewRight(), но файл доступен по прямому URL.",
+        "recommendation": "Перед выводом страницы добавить проверку прав доступа к модулю: AccessController::isViewRight() или $APPLICATION->GetGroupRight('awz.banobots'), при отсутствии прав — $APPLICATION->AuthForm('ACCESS_DENIED') и die(). Дополнительно установить POST_RIGHT для корректной работы действий списка.",
+        "fix": "Before:\nif(file_exists(__DIR__. DIRECTORY_SEPARATOR.'check_awz_admin.php')){\n    require_once('check_awz_admin.php');\n}elseif(!Loader::includeModule('awz.admin')){\n    return;\n}\n\nAfter:\nuse Awz\\Banobots\\Access\\AccessController;\nif(file_exists(__DIR__. DIRECTORY_SEPARATOR.'check_awz_admin.php')){\n    require_once('check_awz_admin.php');\n}elseif(!Loader::includeModule('awz.admin')){\n    return;\n}\n\nif(!AccessController::isViewRight()){\n    $APPLICATION->AuthForm(Loc::getMessage('ACCESS_DENIED'));\n    die();\n}\n$POST_RIGHT = $APPLICATION->GetGroupRight($module_id);",
         "reviewed": {
-          "oldSeverity": "low",
-          "newSeverity": "low",
+          "oldSeverity": "medium",
+          "newSeverity": "medium",
           "changed": false,
           "category": "kept-as-reported",
           "versionScope": "current",
@@ -27,21 +27,19 @@
           "status": "accepted_risk",
           "note": "",
           "author": "Andrew Zahalski",
-          "updated_at": "2026-11-22T20:05:24+00:00"
+          "updated_at": "2026-11-22T22:27:53+00:00"
         }
       }
     ],
-    "summary": "Повторное сканирование awz.banobots 1.0.5: 1 находка (low) при анализе всех 56 целевых файлов модуля (языковые файлы — только справочники $MESS). Прежняя находка IDOR/прав в admin/ban_list.php (1.0.4) НЕ воспроизводится: возвращена проверка AccessController::isViewRight() (ban_list.php:15-18) с AuthForm; трассировка доведена до конца — isViewRight (accesscontroller.php:57-61) → AccessController::can → RuleFactory → Permission\\Rules\\RightView (rules/rightview.php:9-20): аноним отклоняется (CurrentUser->getId() пуст → false в accesscontroller.php:58-59), неадмин проходит только при наличии роли с PERMISSION_ID=98 в awz_banobots_permission через UserModel::getPermissions (model/usermodel.php:44-77). Дополнительно групповые операции удаления в списке гейтируются $POST_RIGHT=='W' (awz.admin ilist.php:259-302), который на странице не устанавливается, — операции записи недоступны пользователям с правом только на просмотр. Прежнее XSS-подозрение (USER_AGENT/PAGE/REFERER в таблице банов) снято: значения пишутся после sanitizeLogValue (handlers.php:370-378), а вывод идёт через внешний awz.admin IList → \\CAdminUiList::AddRow (awz.admin lib/ilist.php:166), рендер значений выполняет ядро Bitrix (CAdminUiListRow/AddViewField с htmlspecialcharsex) — пользовательские <script> из UA/Referer экранируются. Отклонены сигналы recon: 'Sink: OS command' в model/usermodel.php:25,59 — это ORM Query->exec(), не shell; 'Regex injection' handlers.php:38 — паттерн собирается из preg_quote (handlers.php:37); 'Sink: code exec' options.php:301 / handlers.php:279 — строки-литералы дефолтных настроек; include/require — фиксированные пути; LocalRedirect (options.php:73,88) — на собственный $saveUrl. Новая находка: логи заблокированных запросов (IP/UA/PAGE/REFERER) могут писаться в document_root по предсказуемому пути (low, hardening, требует прав SETT_EDIT). Находок уровня high/medium не обнаружено.",
+    "summary": "Обнаружена 1 уязвимость в 1 файле при анализе 56 файлов модуля awz.banobots v1.0.7. Максимальная severity: medium. Прежняя находка IDOR/доступ без проверки прав (ban_list.php) НЕ воспроизводилась в предыдущих версиях из-за временного присутствия AccessController::isViewRight(); в текущей сборке 1.0.7 она восстановлена после того, как проверка была убрана. Три прежние low-находки (Path Traversal в путях логов, Stored XSS через sanitizeLogValue, ReDoS в maskMatch) больше не воспроизводятся: Path Traversal полностью закрыт новой логикой в lib/handlers.php:160-173 (относительные пути отбрасываются), sanitizeLogValue теперь вырезает < и > (строка 85), regex паттерн защищён preg_quote. Recon сигналы (ORM exec(), eval()-строки дефолтов, фиксированные include/require, LocalRedirect на самосформированный saveUrl) осознанно отклонены.",
     "scannedFiles": 56,
-    "riskLevel": "low",
+    "riskLevel": "medium",
     "auditedFiles": [
       ".settings.php",
-      "include.php",
-      "options.php",
-      "updater.php",
       "admin/ban_list.php",
       "admin/check_awz_admin.php",
       "admin/menu.php",
+      "include.php",
       "install/index.php",
       "install/solution.php",
       "install/unstep.php",
@@ -51,49 +49,17 @@
       "lib/handlers.php",
       "lib/access/accesscontroller.php",
       "lib/access/handlers.php",
-      "lib/access/component/configpermissions.php",
+      "lib/access/model/usermodel.php",
       "lib/access/custom/actiondictionary.php",
       "lib/access/custom/componentconfig.php",
-      "lib/access/custom/helper.php",
-      "lib/access/custom/permissiondictionary.php",
-      "lib/access/custom/roledictionary.php",
-      "lib/access/custom/rules/example.php",
-      "lib/access/entity/user.php",
-      "lib/access/entityselectors/group.php",
-      "lib/access/entityselectors/user.php",
-      "lib/access/include/moduleright.php",
-      "lib/access/model/basemodel.php",
-      "lib/access/model/usermodel.php",
-      "lib/access/permission/actiondictionary.php",
-      "lib/access/permission/permissiondictionary.php",
-      "lib/access/permission/roledictionary.php",
-      "lib/access/permission/roleutil.php",
       "lib/access/permission/rulefactory.php",
-      "lib/access/permission/rules/rightedit.php",
-      "lib/access/permission/rules/rightview.php",
-      "lib/access/permission/rules/settedit.php",
-      "lib/access/permission/rules/settview.php",
-      "lib/access/tables/permission.php",
-      "lib/access/tables/role.php",
-      "lib/access/tables/rolerelation.php",
       "lib/tables/ban.php",
       "lib/tables/adminpages/banlist.php",
-      "lang/ru/options.php",
-      "lang/ru/admin/check_awz_admin.php",
-      "lang/ru/admin/menu.php",
-      "lang/ru/install/index.php",
-      "lang/ru/lib/access/component/configpermissions.php",
-      "lang/ru/lib/access/custom/componentconfig.php",
-      "lang/ru/lib/access/custom/permissiondictionary.php",
-      "lang/ru/lib/access/entityselectors/group.php",
-      "lang/ru/lib/access/entityselectors/user.php",
-      "lang/ru/lib/access/include/moduleright.php",
-      "lang/ru/lib/access/permission/permissiondictionary.php",
-      "lang/ru/lib/tables/adminpages/banlist.php",
-      "lang/ru/install/index.php"
+      "options.php",
+      "updater.php"
     ],
     "reviewSummary": {
-      "reviewedAt": "2026-11-22",
+      "reviewedAt": "2026-11-23",
       "method": "BUS-aware triage: preserve original finding fields except severity, add reviewed node with old severity and rationale.",
       "totals": {
         "vulnerabilities": 1,
@@ -101,18 +67,18 @@
         "unchangedSeverity": 1
       },
       "rawSeverityCounts": {
-        "low": 1
+        "medium": 1
       },
       "reviewedSeverityCounts": {
-        "low": 1
+        "medium": 1
       },
       "currentScope": {
         "total": 1,
         "rawSeverityCounts": {
-          "low": 1
+          "medium": 1
         },
         "reviewedSeverityCounts": {
-          "low": 1
+          "medium": 1
         },
         "reviewedCategories": {
           "kept-as-reported": 1
@@ -130,7 +96,7 @@
       ]
     },
     "feedbackSummary": {
-      "updatedAt": "2026-11-22T20:05:24+00:00",
+      "updatedAt": "2026-11-22T22:27:53+00:00",
       "applied": 1
     }
   }

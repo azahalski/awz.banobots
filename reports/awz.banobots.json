@@ -1,0 +1,44 @@
+{
+  "success": true,
+  "requestId": "awz.banobots-1795396260",
+  "data": {
+    "vulnerabilities": [
+      {
+        "file": "admin/ban_list.php",
+        "line": "1-31",
+        "type": "Information Disclosure",
+        "severity": "medium",
+        "description": "Подтверждено: административная страница списка блокировок не проверяет права доступа к модулю awz.banobots. Файл подключает prolog_admin_before.php (требует только факта авторизации в админзоне /bitrix/admin/) и включает check_awz_admin.php:9-44, который лишь проверяет установку модуля awz.admin через Loader::includeModule('awz.admin') и НЕ проверяет права пользователя на работу с баноботами. Любое лицо, авторизованное в админ-панели Bitrix без специфического права на awz.banobots (например, обычный зарегистрированный пользователь сайта), открывает /bitrix/admin/awz_banobots_ban_list.php и видит полный список блокировок: IP-адреса посетителей, User-Agent, посещённые страницы (PAGE), REFERER и даты — данные всех посетителей сайта, включая не забаненных ранее. Записи рендерятся через внешний awz.admin IList → CAdminUiList::AddRow (экранирование на стороне списка), stored XSS не подтверждается; проблема — именно чтение чувствительных данных. Групповые операции удаления/редактирования гейтируются $POST_RIGHT=='W', который на странице не установлен (lib/ilist.php:262 в awz.admin), поэтому эксплуатация ограничена чтением. Меню admin/menu.php скрывает пункт меню по правам AccessController::isViewRight(), но файл доступен по прямому URL.",
+        "recommendation": "Перед выводом страницы добавить проверку прав доступа к модулю: AccessController::isViewRight() или $APPLICATION->GetGroupRight('awz.banobots'), при отсутствии прав — $APPLICATION->AuthForm('ACCESS_DENIED') и die(). Дополнительно установить POST_RIGHT для корректной работы действий списка.",
+        "fix": "Before:\nif(file_exists(__DIR__. DIRECTORY_SEPARATOR.'check_awz_admin.php')){\n    require_once('check_awz_admin.php');\n}elseif(!Loader::includeModule('awz.admin')){\n    return;\n}\n\nAfter:\nuse Awz\\Banobots\\Access\\AccessController;\nif(file_exists(__DIR__. DIRECTORY_SEPARATOR.'check_awz_admin.php')){\n    require_once('check_awz_admin.php');\n}elseif(!Loader::includeModule('awz.admin')){\n    return;\n}\n\nif(!AccessController::isViewRight()){\n    $APPLICATION->AuthForm(Loc::getMessage('ACCESS_DENIED'));\n    die();\n}\n$POST_RIGHT = $APPLICATION->GetGroupRight($module_id);"
+      }
+    ],
+    "summary": "Обнаружена 1 уязвимость в 1 файле при анализе 56 файлов модуля awz.banobots v1.0.7. Максимальная severity: medium. Прежняя находка IDOR/доступ без проверки прав (ban_list.php) НЕ воспроизводилась в предыдущих версиях из-за временного присутствия AccessController::isViewRight(); в текущей сборке 1.0.7 она восстановлена после того, как проверка была убрана. Три прежние low-находки (Path Traversal в путях логов, Stored XSS через sanitizeLogValue, ReDoS в maskMatch) больше не воспроизводятся: Path Traversal полностью закрыт новой логикой в lib/handlers.php:160-173 (относительные пути отбрасываются), sanitizeLogValue теперь вырезает < и > (строка 85), regex паттерн защищён preg_quote. Recon сигналы (ORM exec(), eval()-строки дефолтов, фиксированные include/require, LocalRedirect на самосформированный saveUrl) осознанно отклонены.",
+    "scannedFiles": 56,
+    "riskLevel": "medium",
+    "auditedFiles": [
+      ".settings.php",
+      "admin/ban_list.php",
+      "admin/check_awz_admin.php",
+      "admin/menu.php",
+      "include.php",
+      "install/index.php",
+      "install/solution.php",
+      "install/unstep.php",
+      "install/version.php",
+      "install/admin/awz_banobots_ban_list.php",
+      "install/components/banobots.config.permissions/ajax.php",
+      "lib/handlers.php",
+      "lib/access/accesscontroller.php",
+      "lib/access/handlers.php",
+      "lib/access/model/usermodel.php",
+      "lib/access/custom/actiondictionary.php",
+      "lib/access/custom/componentconfig.php",
+      "lib/access/permission/rulefactory.php",
+      "lib/tables/ban.php",
+      "lib/tables/adminpages/banlist.php",
+      "options.php",
+      "updater.php"
+    ]
+  }
+}

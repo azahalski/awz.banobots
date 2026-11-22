@@ -5,15 +5,15 @@
   },
   "current_state": {
     "status": "needs_review",
-    "last_run_id": "awz.banobots-1795376955",
+    "last_run_id": "awz.banobots-1795396260",
     "archive_sha256": null,
     "open_findings": 0,
     "blocking_findings_open": 0,
     "false_positive_findings": 0,
     "accepted_risk_findings": 1,
-    "fixed_findings": 9,
+    "fixed_findings": 10,
     "removed_findings": 0,
-    "total_findings": 10
+    "total_findings": 11
   },
   "runs": [
     {
@@ -117,6 +117,23 @@
         "still_open_findings": 1,
         "reopened_findings": 0,
         "resolved_since_previous_run": 0
+      }
+    },
+    {
+      "run_id": "awz.banobots-1795396260",
+      "created_at": "2026-11-22T22:12:40+00:00",
+      "archive_sha256": null,
+      "scanner_request_id": "awz.banobots-1795396260",
+      "input_summary": "Обнаружена 1 уязвимость в 1 файле при анализе 56 файлов модуля awz.banobots v1.0.7. Максимальная severity: medium. Прежняя находка IDOR/доступ без проверки прав (ban_list.php) НЕ воспроизводилась в предыдущих версиях из-за временного присутствия AccessController::isViewRight(); в текущей сборке 1.0.7 она восстановлена после того, как проверка была убрана. Три прежние low-находки (Path Traversal в путях логов, Stored XSS через sanitizeLogValue, ReDoS в maskMatch) больше не воспроизводятся: Path Traversal полностью закрыт новой логикой в lib/handlers.php:160-173 (относительные пути отбрасываются), sanitizeLogValue теперь вырезает < и > (строка 85), regex паттерн защищён preg_quote. Recon сигналы (ORM exec(), eval()-строки дефолтов, фиксированные include/require, LocalRedirect на самосформированный saveUrl) осознанно отклонены.",
+      "summary": {
+        "current_scan_findings": 1,
+        "severity_counts": {
+          "medium": 1
+        },
+        "new_findings": 1,
+        "still_open_findings": 0,
+        "reopened_findings": 0,
+        "resolved_since_previous_run": 1
       }
     }
   ],
@@ -685,18 +702,15 @@
       "fingerprint": "fe5229e4255460c6a04f2598ab49e7dc",
       "type": "Information Disclosure",
       "severity": "low",
-      "status": "accepted_risk",
+      "status": "fixed",
       "first_seen_run_id": "awz.banobots-1795376955",
       "last_seen_run_id": "awz.banobots-1795376955",
-      "resolved_run_id": null,
+      "resolved_run_id": "awz.banobots-1795396260",
       "original_location": {
         "file": "lib/handlers.php",
         "line": "89-115,155-168,312-313,343-344"
       },
-      "current_location": {
-        "file": "lib/handlers.php",
-        "line": "89-115,155-168,312-313,343-344"
-      },
+      "current_location": null,
       "latest_vulnerability": {
         "file": "lib/handlers.php",
         "line": "89-115,155-168,312-313,343-344",
@@ -721,7 +735,7 @@
           "status": "accepted_risk",
           "note": "",
           "author": "Andrew Zahalski",
-          "updated_at": "2026-11-22T20:05:24+00:00"
+          "updated_at": "2026-11-22T20:09:40+00:00"
         }
       },
       "events": [
@@ -757,6 +771,90 @@
           "run_id": "awz.banobots-1795376955",
           "event": "partner_disposition_updated",
           "at": "2026-11-22T20:05:24+00:00",
+          "status": "accepted_risk",
+          "note": "",
+          "author": "Andrew Zahalski"
+        },
+        {
+          "run_id": "awz.banobots-1795376955",
+          "event": "partner_disposition_updated",
+          "at": "2026-11-22T20:09:40+00:00",
+          "status": "accepted_risk",
+          "note": "",
+          "author": "Andrew Zahalski"
+        },
+        {
+          "run_id": "awz.banobots-1795396260",
+          "event": "resolved",
+          "at": "2026-11-22T22:12:40+00:00",
+          "status": "fixed"
+        }
+      ],
+      "resolution": {
+        "type": "not_reproduced_after_rescan",
+        "resolved_in_run": "awz.banobots-1795396260",
+        "reason": "The reviewed scan no longer reports a matching finding for the current archive."
+      }
+    },
+    {
+      "journal_finding_id": "JF-00011",
+      "fingerprint": "f9e30323fab6a73b0aea2901765026fa",
+      "type": "Information Disclosure",
+      "severity": "medium",
+      "status": "accepted_risk",
+      "first_seen_run_id": "awz.banobots-1795396260",
+      "last_seen_run_id": "awz.banobots-1795396260",
+      "resolved_run_id": null,
+      "original_location": {
+        "file": "admin/ban_list.php",
+        "line": "1-31"
+      },
+      "current_location": {
+        "file": "admin/ban_list.php",
+        "line": "1-31"
+      },
+      "latest_vulnerability": {
+        "file": "admin/ban_list.php",
+        "line": "1-31",
+        "type": "Information Disclosure",
+        "severity": "medium",
+        "description": "Подтверждено: административная страница списка блокировок не проверяет права доступа к модулю awz.banobots. Файл подключает prolog_admin_before.php (требует только факта авторизации в админзоне /bitrix/admin/) и включает check_awz_admin.php:9-44, который лишь проверяет установку модуля awz.admin через Loader::includeModule('awz.admin') и НЕ проверяет права пользователя на работу с баноботами. Любое лицо, авторизованное в админ-панели Bitrix без специфического права на awz.banobots (например, обычный зарегистрированный пользователь сайта), открывает /bitrix/admin/awz_banobots_ban_list.php и видит полный список блокировок: IP-адреса посетителей, User-Agent, посещённые страницы (PAGE), REFERER и даты — данные всех посетителей сайта, включая не забаненных ранее. Записи рендерятся через внешний awz.admin IList → CAdminUiList::AddRow (экранирование на стороне списка), stored XSS не подтверждается; проблема — именно чтение чувствительных данных. Групповые операции удаления/редактирования гейтируются $POST_RIGHT=='W', который на странице не установлен (lib/ilist.php:262 в awz.admin), поэтому эксплуатация ограничена чтением. Меню admin/menu.php скрывает пункт меню по правам AccessController::isViewRight(), но файл доступен по прямому URL.",
+        "recommendation": "Перед выводом страницы добавить проверку прав доступа к модулю: AccessController::isViewRight() или $APPLICATION->GetGroupRight('awz.banobots'), при отсутствии прав — $APPLICATION->AuthForm('ACCESS_DENIED') и die(). Дополнительно установить POST_RIGHT для корректной работы действий списка.",
+        "fix": "Before:\nif(file_exists(__DIR__. DIRECTORY_SEPARATOR.'check_awz_admin.php')){\n    require_once('check_awz_admin.php');\n}elseif(!Loader::includeModule('awz.admin')){\n    return;\n}\n\nAfter:\nuse Awz\\Banobots\\Access\\AccessController;\nif(file_exists(__DIR__. DIRECTORY_SEPARATOR.'check_awz_admin.php')){\n    require_once('check_awz_admin.php');\n}elseif(!Loader::includeModule('awz.admin')){\n    return;\n}\n\nif(!AccessController::isViewRight()){\n    $APPLICATION->AuthForm(Loc::getMessage('ACCESS_DENIED'));\n    die();\n}\n$POST_RIGHT = $APPLICATION->GetGroupRight($module_id);",
+        "reviewed": {
+          "oldSeverity": "medium",
+          "newSeverity": "medium",
+          "changed": false,
+          "category": "kept-as-reported",
+          "versionScope": "current",
+          "version": "current",
+          "currentVersionRelevance": "present-in-current-scan",
+          "action": "fix",
+          "confidence": "medium",
+          "rationale": "Severity left unchanged after review; no stronger Bitrix/BUS-specific downgrade condition was identified from the journal text alone."
+        },
+        "partner_disposition": {
+          "status": "accepted_risk",
+          "note": "",
+          "author": "Andrew Zahalski",
+          "updated_at": "2026-11-22T22:27:53+00:00"
+        }
+      },
+      "events": [
+        {
+          "run_id": "awz.banobots-1795396260",
+          "event": "detected",
+          "at": "2026-11-22T22:12:40+00:00",
+          "location": {
+            "file": "admin/ban_list.php",
+            "line": "1-31"
+          },
+          "status": "open"
+        },
+        {
+          "run_id": "awz.banobots-1795396260",
+          "event": "partner_disposition_updated",
+          "at": "2026-11-22T22:27:53+00:00",
           "status": "accepted_risk",
           "note": "",
           "author": "Andrew Zahalski"
