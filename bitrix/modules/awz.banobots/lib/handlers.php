@@ -152,31 +152,28 @@ class Handlers
         // Белый список IP (ваш IP, IP сервера, чтобы случайно не заблокировать себя)
         $whiteListIps = self::getOptionList('IP_WHITE_LIST', '127.0.0.1');
 
-        // Пути файлов логов (относительные разрешаются от корня сайта, но логи в web-root запрещены; пусто - не вести лог)
+        // Пути файлов логов (только абсолютные пути вне web-root; пусто - не вести лог)
         $banFile = trim((string)Option::get(self::MODULE_ID, 'LOG_FILE_BAN', '', ""));
         $banBots = trim((string)Option::get(self::MODULE_ID, 'LOG_FILE_BOTS', '', ""));
         $banFileCountry = trim((string)Option::get(self::MODULE_ID, 'LOG_FILE_COUNTRY', '', ""));
-        $docRoot = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
+        $docRoot = str_replace('\\', '/', rtrim((string)realpath($_SERVER['DOCUMENT_ROOT'] ?? ''), '/\\'));
         foreach (array('banFile' => &$banFile, 'banBots' => &$banBots, 'banFileCountry' => &$banFileCountry) as $key => &$logPath) {
-            if ($logPath !== '' && $logPath[0] !== '/' && !preg_match('#^[a-zA-Z]:[\\\\/]#', $logPath)) {
-                // относительные пути разрешаются от document root, но не должны попадать в web-root
-                $abs = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\') . '/' . ltrim($logPath, '/\\');
-                $absDir = realpath(dirname($abs));
-                if ($docRoot !== false && $absDir !== false && strpos($absDir, $docRoot) === 0) {
-                    $logPath = '';
-                } else {
-                    $logPath = $abs;
-                }
-            } elseif ($logPath !== '') {
-                // абсолютный путь, указывающий внутрь web-root, также запрещен
-                $absDir = realpath(dirname($logPath));
-                if ($docRoot !== false && $absDir !== false && strpos($absDir, $docRoot) === 0) {
-                    $logPath = '';
-                }
+            if ($logPath === '') { continue; }
+            // любой относительный путь разрешается от DOCUMENT_ROOT, т.е. попадает в web-root — запрещаем
+            if ($logPath[0] !== '/' && !preg_match('#^[a-zA-Z]:[\\\\/]#', $logPath)) {
+                $logPath = '';
+                continue;
+            }
+            // нормализуем путь без обращения к несуществующему каталогу
+            $normalized = str_replace('\\', '/', $logPath);
+            if ($docRoot !== '' && strpos($normalized, $docRoot.'/') === 0) {
+                // внутри web-root писать нельзя даже в несуществующий каталог
+                $logPath = '';
+                continue;
             }
             $logDir = dirname($logPath);
-            if ($logPath !== '' && self::isAllowedLogFile($logPath) && $logDir && !is_dir($logDir)) {
-                @mkdir($logDir, BX_DIR_PERMISSIONS ?? 0755, true);
+            if (self::isAllowedLogFile($logPath) && $logDir && !is_dir($logDir)) {
+                @mkdir($logDir, defined('BX_DIR_PERMISSIONS') ? BX_DIR_PERMISSIONS : 0755, true);
             }
         }
         unset($logPath);
