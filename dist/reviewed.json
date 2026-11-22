@@ -22,6 +22,12 @@
           "action": "fix",
           "confidence": "medium",
           "rationale": "Severity left unchanged after review; no stronger Bitrix/BUS-specific downgrade condition was identified from the journal text alone."
+        },
+        "partner_disposition": {
+          "status": "accepted_risk",
+          "note": "",
+          "author": "Andrew Zahalski",
+          "updated_at": "2026-11-22T19:29:13+00:00"
         }
       },
       {
@@ -43,6 +49,12 @@
           "action": "harden-output-escaping",
           "confidence": "high",
           "rationale": "Downgraded because the journal describes a stored XSS source controlled by a Bitrix admin/content editor or another trusted content-management role. In BUS such users can normally publish HTML/JS through legitimate site-management mechanisms, so this is template hardening rather than a high module vulnerability unless a low-privileged/external source is proven."
+        },
+        "partner_disposition": {
+          "status": "accepted_risk",
+          "note": "",
+          "author": "Andrew Zahalski",
+          "updated_at": "2026-11-22T19:29:13+00:00"
         }
       }
     ],
@@ -144,6 +156,10 @@
         "Type, file, line, description, recommendation and fix are preserved from the source journal.",
         "Severity is replaced with reviewed triage severity."
       ]
+    },
+    "feedbackSummary": {
+      "updatedAt": "2026-11-22T19:29:13+00:00",
+      "applied": 2
     }
   }
 }

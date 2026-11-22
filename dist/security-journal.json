@@ -7,10 +7,10 @@
     "status": "needs_review",
     "last_run_id": "awz.banobots-1795386159",
     "archive_sha256": null,
-    "open_findings": 2,
+    "open_findings": 0,
     "blocking_findings_open": 0,
     "false_positive_findings": 0,
-    "accepted_risk_findings": 0,
+    "accepted_risk_findings": 2,
     "fixed_findings": 4,
     "removed_findings": 0,
     "total_findings": 6
@@ -309,7 +309,7 @@
       "fingerprint": "131e25dc458790e9af31e2bef6fed465",
       "type": "Information Disclosure",
       "severity": "low",
-      "status": "open",
+      "status": "accepted_risk",
       "first_seen_run_id": "awz.banobots-1795386159",
       "last_seen_run_id": "awz.banobots-1795386159",
       "resolved_run_id": null,
@@ -340,6 +340,12 @@
           "action": "fix",
           "confidence": "medium",
           "rationale": "Severity left unchanged after review; no stronger Bitrix/BUS-specific downgrade condition was identified from the journal text alone."
+        },
+        "partner_disposition": {
+          "status": "accepted_risk",
+          "note": "",
+          "author": "Andrew Zahalski",
+          "updated_at": "2026-11-22T19:29:13+00:00"
         }
       },
       "events": [
@@ -352,6 +358,14 @@
             "line": "89-115,155-168,240,312-313,343-344"
           },
           "status": "open"
+        },
+        {
+          "run_id": "awz.banobots-1795386159",
+          "event": "partner_disposition_updated",
+          "at": "2026-11-22T19:29:13+00:00",
+          "status": "accepted_risk",
+          "note": "",
+          "author": "Andrew Zahalski"
         }
       ]
     },
@@ -360,7 +374,7 @@
       "fingerprint": "1a9ac22dbfaf14f1650ea5f1211512e0",
       "type": "Cross-Site Scripting",
       "severity": "low",
-      "status": "open",
+      "status": "accepted_risk",
       "first_seen_run_id": "awz.banobots-1795386159",
       "last_seen_run_id": "awz.banobots-1795386159",
       "resolved_run_id": null,
@@ -391,6 +405,12 @@
           "action": "harden-output-escaping",
           "confidence": "high",
           "rationale": "Downgraded because the journal describes a stored XSS source controlled by a Bitrix admin/content editor or another trusted content-management role. In BUS such users can normally publish HTML/JS through legitimate site-management mechanisms, so this is template hardening rather than a high module vulnerability unless a low-privileged/external source is proven."
+        },
+        "partner_disposition": {
+          "status": "accepted_risk",
+          "note": "",
+          "author": "Andrew Zahalski",
+          "updated_at": "2026-11-22T19:29:13+00:00"
         }
       },
       "events": [
@@ -403,6 +423,14 @@
             "line": "354-382"
           },
           "status": "open"
+        },
+        {
+          "run_id": "awz.banobots-1795386159",
+          "event": "partner_disposition_updated",
+          "at": "2026-11-22T19:29:13+00:00",
+          "status": "accepted_risk",
+          "note": "",
+          "author": "Andrew Zahalski"
         }
       ]
     }
