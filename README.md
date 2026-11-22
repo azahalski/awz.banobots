@@ -1,21 +1,111 @@
-# AWZ: Права доступа (awz.acl)
-
-### [Установка модуля](https://github.com/azahalski/awz.acl/tree/main/docs/install.md)
-### [Добавление прав доступа через конструктор](https://github.com/azahalski/awz.acl/tree/main/docs/right.md)
-### [Архитектура модуля](https://github.com/azahalski/awz.acl/tree/main/docs/arch.md)
+# AWZ: Блокировщик ботов (awz.banobots)
 
 <!-- desc-start -->
 
-Модуль содержит Api для организации ролевой модели прав доступа.
+Модуль предназначен для блокировки ботов и ограничения доступа к сайту по странам. Работает на событии `main::OnBeforeProlog` и обрывает запрос с ответом `403 Forbidden` до исполнения остального кода.
 
-**Поддерживаемые редакции CMS Битрикс:**<br>
+## Возможности
+
+- **Блокировка по странам** — определение страны IP (через модуль `statistic` или `awz.iptown`) с тремя режимами: белый список (банить все страны, кроме указанных), черный список (банить только указанные), бан всех стран. Неопределенная страна доступна как код `N0`.
+- **Черный список ботов** — бан по вхождению в User-Agent (по умолчанию: SERankingBacklinksBot, SemrushBot, Baiduspider, meta-externalagent, applebot). Белый список ботов пропускает поисковых роботов (google, yandex).
+- **Бан пустого User-Agent** — блокировка запросов без User-Agent.
+- **Бан путей сканеров** — блокировка запросов к популярным путям взломщиков (wp-admin, wp-login.php, xmlrpc.php, .env, .git, phpmyadmin, adminer и т.д.).
+- **Бан подозрительных query-параметров** — детект SQL-инъекций, обхода директорий и probes (`union select`, `../`, `/etc/passwd`, `base64_decode` и т.д.).
+- **Таблица блокировок** — все баны сохраняются в БД (IP, страна, User-Agent, страница, referer). Повторные запросы с заблокированного IP отсекаются сразу по таблице.
+- **Белый список IP** — поддержка масок (`*`), защита от блокировки себя.
+- **Ограничение по URL** — правило по странам может действовать только на части сайта (подстроки/маски в REQUEST_URI).
+- **Временные ограничения** — работа модуля «до даты», срок блокировки в днях (0 — бессрочно), агент ежедневно чистит устаревшие записи.
+- **Логирование** — файлы логов заблокированных IP, ботов и расширенный лог по странам (только `.txt`/`.log` вне web-root, ограничение размера, защита от log injection).
+- **Событие для разработчиков** — `awz.banobots::onCheckBan` позволяет добавить свои правила бана (параметры: ip, user_agent, page, country).
+- **Права доступа** — собственная ролевая модель на базе Bitrix Access (просмотр/редактирование настроек, просмотр/редактирование прав), настройка прав из админки.
+- **Счетчики** — заблокированные IP и отраженные запросы за все время.
+
+## Поддерживаемые редакции CMS Битрикс
+
 «Первый сайт», «Старт», «Стандарт», «Малый бизнес», «Эксперт», «Бизнес», «Корпоративный портал», «Энтерпрайз», «Интернет-магазин + CRM»
 
+## Настройки (Настройки → AWZ: Блокировщик ботов)
+
+Вкладка «Общие»:
+
+- `BAN_ENABLED` — включение/выключение блокировки;
+- `BAN_UNTIL_DATE` — дата окончания работы модуля (пусто — без ограничения);
+- `COUNTRY_MODE` — режим блокировки по странам (allow / deny / all);
+- `COUNTRY_ALLOW_LIST`, `COUNTRY_DENY_LIST` — коды стран через запятую (по умолчанию RU,BY,KZ,N0);
+- `IP_WHITE_LIST` — белый список IP, поддерживаются маски `*` (по умолчанию 127.0.0.1);
+- `URL_FILTER` — URL, где действует правило по странам (пусто — весь сайт);
+- `BAN_DAYS` — срок блокировки IP в днях (0 — бессрочно);
+- `BOT_BLACK_LIST`, `BOT_WHITE_LIST` — списки ботов (вхождение в User-Agent, маски `*`).
+
+Вкладка «Доп. правила»:
+
+- `BAN_EMPTY_UA` — бан пустого/отсутствующего User-Agent;
+- `BAN_SCANNER_PATHS` + `SCANNER_PATHS` — блокировка путей сканеров;
+- `BAN_SUSPECT_QUERY` + `SUSPECT_QUERY_PATTERNS` — блокировка подозрительных query-параметров.
+
+Вкладка «Лог»:
+
+- `LOG_FILE_BAN`, `LOG_FILE_BOTS`, `LOG_FILE_COUNTRY` — абсолютные пути лог-файлов вне web-root (пусто — не вести лог);
+- `LOG_MAX_SIZE_MB` — максимальный размер лог-файла (по умолчанию 10 Mb, при превышении удаляются старые строки);
+- кнопка «Очистить блокировки» — полная очистка таблицы банов.
+
+Также доступны: список заблокированных IP (`/bitrix/admin/awz_banobots_ban_list.php`) и настройка прав доступа в слайдере настроек модуля.
+
+## Интеграция
+
+- Необязательная зависимость от модуля `awz.iptown` — используется как fallback определения страны, если модуль `statistic` не определил её.
+- Определение реального IP — через `Bitrix\Main\Service\GeoIp\Manager::getRealIp()`.
+- Событие `awz.banobots::onCheckBan` — возможность добавить свои правила бана (параметры: ip, user_agent, page, country).
+
 <!-- desc-end -->
+
+<!-- dev-start -->
+
+### Пример обработчика события onCheckBan
+
+```php
+use Bitrix\Main\EventManager;
+use Bitrix\Main\EventResult;
+use Bitrix\Main\Event;
+
+EventManager::getInstance()->addEventHandlerCompatible(
+    'awz.banobots',
+    'onCheckBan',
+    function(Event $event)
+    {
+        $params = $event->getParameters();
+        $ip = (string)($params['ip'] ?? '');
+        $page = (string)($params['page'] ?? '');
+
+        // пример: бан по своему списку IP (с поддержкой масок)
+        $myBanList = ['1.2.3.4', '10.0.0.*'];
+        foreach ($myBanList as $pattern) {
+            $regex = '/^' . str_replace('\*', '.*', preg_quote($pattern, '/')) . '$/';
+            if (preg_match($regex, $ip)) {
+                return new EventResult(
+                    EventResult::SUCCESS,
+                    ['ban' => true]
+                );
+            }
+        }
+
+        // пример: бан запросов к определенному URL
+        if (strpos($page, '/secret-section/') !== false) {
+            return new EventResult(
+                EventResult::SUCCESS,
+                ['ban' => true]
+            );
+        }
+    }
+);
+```
+
+При возврате результата `SUCCESS` с параметром `ban = true` модуль добавляет IP в таблицу блокировок, пишет лог и обрывает запрос с ответом `403 Forbidden`.
+
+<!-- dev-end -->
 
 <!-- cl-start -->
 ## История версий
 
-https://github.com/azahalski/awz.acl/blob/master/CHANGELOG.md
-
+См. CHANGELOG.md
 <!-- cl-end -->
