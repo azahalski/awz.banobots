@@ -32,6 +32,10 @@ class BanTable extends DataManager
                 ->configureSize(10),
             (new StringField('USER_AGENT'))
                 ->configureSize(500),
+            (new StringField('PAGE'))
+                ->configureSize(500),
+            (new StringField('REFERER'))
+                ->configureSize(500),
             (new BooleanField('ACTIVE'))
                 ->configureValues('N', 'Y')
                 ->configureDefaultValue(true),

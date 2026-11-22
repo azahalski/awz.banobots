@@ -180,6 +180,23 @@ class awz_banobots extends CModule
     }
 
     function createAgents() {
+        $agentName = '\Awz\Banobots\Handlers::cleanBanTableAgent();';
+        $agent = new \CAgent();
+        $agentData = \CAgent::GetList(
+            array('ID' => 'DESC'),
+            array('MODULE_ID' => $this->MODULE_ID, 'NAME' => $agentName)
+        );
+        if(!$agentData->Fetch()) {
+            $agent->AddAgent(
+                $agentName,
+                $this->MODULE_ID,
+                'N',
+                86400,
+                '',
+                'Y',
+                ConvertTimeStamp(time()+60, 'FULL')
+            );
+        }
         return true;
     }
 

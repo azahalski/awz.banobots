@@ -20,10 +20,7 @@ class Handlers
             foreach (explode(',', $line) as $item) {
                 $item = trim((string)$item);
                 if ($item !== '') {
-                    $ar[] = mb_substr($item, 0, 255);
-                }
-                if (count($ar) >= 100) {
-                    return $ar;
+                    $ar[] = $item;
                 }
             }
         }
@@ -34,7 +31,6 @@ class Handlers
     {
         $pattern = trim((string)$pattern);
         if ($pattern === '') return false;
-        $pattern = mb_substr($pattern, 0, 255);
         $subjectLower = mb_strtolower((string)$subject, 'UTF-8');
         $patternLower = mb_strtolower($pattern, 'UTF-8');
         if (strpos($pattern, '*') !== false) {
@@ -76,9 +72,26 @@ class Handlers
         self::incrementOptionCounter('COUNTER_BLOCKED_REQUESTS');
     }
 
+    protected static function isAllowedLogFile($file)
+    {
+        if ($file === '') return false;
+        $ext = mb_strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        return in_array($ext, array('txt', 'log'), true);
+    }
+
+    protected static function sanitizeLogValue($value)
+    {
+        // удаляем переводы строк, управляющие символы и кавычки - защита от log injection и XSS
+        $value = str_replace(array('"', "'", '`'), '', (string)$value);
+        return preg_replace('/[\x00-\x1F\x7F]/u', ' ', $value);
+    }
+
     protected static function appendLog($file, $line)
     {
-        if ($file === '' || $line === '') return;
+        // разрешены только файлы .txt и .log
+        if (!self::isAllowedLogFile($file)) return;
+        $line = self::sanitizeLogValue($line);
+        if ($line === '') return;
         file_put_contents($file, $line . PHP_EOL, FILE_APPEND | LOCK_EX);
 
         // Ограничение размера лога (в Mb). При превышении удаляются первые строки
@@ -148,7 +161,7 @@ class Handlers
                 $logPath = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\') . '/' . ltrim($logPath, '/\\');
             }
             $logDir = dirname($logPath);
-            if ($logPath !== '' && $logDir && !is_dir($logDir)) {
+            if ($logPath !== '' && self::isAllowedLogFile($logPath) && $logDir && !is_dir($logDir)) {
                 @mkdir($logDir, BX_DIR_PERMISSIONS ?? 0755, true);
             }
         }
@@ -340,6 +353,8 @@ class Handlers
 
     protected static function addBanRecord($ip, $countryCode, $userAgent)
     {
+        $page = $_SERVER['REQUEST_URI'] ?? '';
+        $referer = $_SERVER['HTTP_REFERER'] ?? '';
         try {
             // уникальный IP за все время
             if ($ip !== '') {
@@ -354,13 +369,29 @@ class Handlers
             }
             Tables\BanTable::add(array(
                 'DATE_BAN' => new \Bitrix\Main\Type\DateTime(),
-                'IP' => mb_substr((string)$ip, 0, 50),
-                'COUNTRY' => mb_substr((string)$countryCode, 0, 10),
-                'USER_AGENT' => mb_substr((string)$userAgent, 0, 500),
+                'IP' => mb_substr(self::sanitizeLogValue($ip), 0, 50),
+                'COUNTRY' => mb_substr(self::sanitizeLogValue($countryCode), 0, 10),
+                'USER_AGENT' => mb_substr(self::sanitizeLogValue($userAgent), 0, 500),
+                'PAGE' => mb_substr(self::sanitizeLogValue($page), 0, 500),
+                'REFERER' => mb_substr(self::sanitizeLogValue($referer), 0, 500),
                 'ACTIVE' => 'Y'
             ));
         } catch (\Exception $e) {
         } catch (\Throwable $e) {
         }
+    }
+
+    public static function cleanBanTableAgent()
+    {
+        try {
+            $banDays = (int)Option::get(self::MODULE_ID, 'BAN_DAYS', '0', "");
+            if ($banDays <= 0) {
+                $banDays = 90;
+            }
+            $dateLimit = \Bitrix\Main\Type\DateTime::createFromTimestamp(time() - $banDays * 86400);
+            Tables\BanTable::deleteByFilter(array('<DATE_BAN' => $dateLimit));
+        } catch (\Exception $e) {
+        }
+        return '\Awz\Banobots\Handlers::cleanBanTableAgent();';
     }
 }

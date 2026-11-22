@@ -43,6 +43,8 @@ class BanList extends IList implements IParams {
                 'IP'=>[],
                 'COUNTRY'=>[],
                 'USER_AGENT'=>[],
+                'PAGE'=>[],
+                'REFERER'=>[],
                 'DATE_BAN'=>[],
                 'ACTIVE'=>[],
             ),

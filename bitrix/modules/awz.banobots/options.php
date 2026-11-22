@@ -56,7 +56,11 @@ $tabControl = new CAdminTabControl("tabControl", $aTabs);
 
 if ($request->getRequestMethod()==='POST' && AccessController::isEditSettings() && ($request->get('ClearBans') || $request->get('Update')))
 {
-    check_bitrix_sessid();
+    if (!check_bitrix_sessid())
+    {
+        $APPLICATION->AuthForm(Loc::getMessage('ACCESS_DENIED'));
+        die();
+    }
 }
 
 if ($request->getRequestMethod()==='POST' && AccessController::isEditSettings() && $request->get('ClearBans'))
@@ -88,6 +92,7 @@ $tabControl->Begin();
 ?>
     <style>.adm-workarea option:checked {background-color: rgb(206, 206, 206);}</style>
     <form method="POST" action="<?=$saveUrl?>" id="FORMACTION">
+        <?=bitrix_sessid_post()?>
         <?
         $tabControl->BeginNextTab();
         Extension::load("ui.alerts");
@@ -289,7 +294,7 @@ $tabControl->Begin();
                 <input type="checkbox" value="Y" name="BAN_SUSPECT_QUERY" <?if ($val=="Y") echo "checked";?>>
             </td>
         </tr>
-
+        <?if(false){?>
         <tr>
             <td><?=Loc::getMessage('AWZ_BANOBOTS_OPT_SUSPECT_QUERY_PATTERNS')?></td>
             <td>
@@ -297,6 +302,7 @@ $tabControl->Begin();
                 <textarea name="SUSPECT_QUERY_PATTERNS" rows="5" cols="60" style="width:100%;max-width:447px;display:block"><?=htmlspecialcharsbx($val)?></textarea>
             </td>
         </tr>
+        <?}?>
 
         <?$tabControl->BeginNextTab();?>
 
@@ -337,7 +343,6 @@ $tabControl->Begin();
         ?>
         <input <?if (!AccessController::isEditSettings()) echo "disabled" ?> type="submit" class="adm-btn-green" name="Update" value="<?=Loc::getMessage('AWZ_BANOBOTS_OPT_L_BTN_SAVE')?>" />
         <input type="hidden" name="Update" value="Y" />
-        <?=bitrix_sessid_post()?>
         <input <?if (!AccessController::isEditSettings()) echo "disabled" ?> type="submit" class="adm-btn" name="ClearBans" value="<?=Loc::getMessage('AWZ_BANOBOTS_OPT_CLEAR_BANS')?>" onclick="return confirm('<?=CUtil::JSEscape(Loc::getMessage('AWZ_BANOBOTS_OPT_CLEAR_BANS_CONFIRM'))?>');" />
         <input type="hidden" name="ClearBans" value="" />
         <?if(AccessController::isViewRight()){?>
