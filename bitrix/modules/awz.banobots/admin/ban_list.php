@@ -2,6 +2,7 @@
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_before.php");
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Loader;
+use Awz\Banobots\Access\AccessController;
 
 global $APPLICATION;
 $dirs = explode(DIRECTORY_SEPARATOR, dirname(__DIR__, 1));
@@ -10,6 +11,11 @@ unset($dirs);
 Loc::loadMessages(__FILE__);
 
 if(!Loader::includeModule($module_id)) return;
+
+if(!AccessController::isViewRight()){
+    $APPLICATION->AuthForm(Loc::getMessage('ACCESS_DENIED'));
+    return;
+}
 
 if(file_exists(__DIR__. DIRECTORY_SEPARATOR.'check_awz_admin.php')){
     require_once('check_awz_admin.php');
