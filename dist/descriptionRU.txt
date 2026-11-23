@@ -1,0 +1,65 @@
+[center][size=18pt][b]AWZ: Блокировка ботов и защита от DDoS[/b][/size]
+[IMG WIDTH=225 HEIGHT=9]https://zahalski.dev/upload/awz.load.ai/lv1iyow5dj.png[/IMG][/center]
+[center]
+[TABLE][TR][TH][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=150 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/5bgfxic7b1.png[/IMG][/TH][TH][b]Блокировка ботов и отражение DDoS: правила по паттернам User-Agent и по IP-адресам, журнал срабатываний в админ-панели.[/b][/TH][TH][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=150 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/5bgfxic7b1.png[/IMG][/TH][/TR][TR][TH][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][/TH][/TR][TR][TH][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=150 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/5bgfxic7b1.png[/IMG][/TH][TH][color=#8b93b3]Настраивается из админ-панели списками - без правки кода сайта.[/color][/TH][TH][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=150 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/5bgfxic7b1.png[/IMG][/TH][/TR][/TABLE][/center]
+[center]
+[TABLE][TR][TH][center][IMG WIDTH=72 HEIGHT=72]https://zahalski.dev/upload/awz.load.ai/lutnvvqvgl.png[/IMG][/center]
+
+[center][b]Блокировка ботов[/b][/center][color=#8b93b3]список паттернов User-Agent отсекает запросы роботов.[/color][/TH][TH][center][IMG WIDTH=10 HEIGHT=20]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][/center][/TH][TH][center][IMG WIDTH=72 HEIGHT=72]https://zahalski.dev/upload/awz.load.ai/z0l7pmlqk8.png[/IMG][/center]
+
+[center][b]Бан по IP[/b][/center][color=#8b93b3]нежелательные адреса блокируются адресно.[/color][/TH][/TR][TR][TH][center][IMG WIDTH=10 HEIGHT=20]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][/center][/TH][TH][center][IMG WIDTH=10 HEIGHT=20]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][/center][/TH][TH][center][IMG WIDTH=10 HEIGHT=20]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][/center][/TH][/TR][TR][TH][center][IMG WIDTH=72 HEIGHT=72]https://zahalski.dev/upload/awz.load.ai/n35kio4x3q.png[/IMG][/center]
+
+[center][b]Отражение DDoS[/b][/center][color=#8b93b3]вредоносный трафик не доходит до страниц сайта.[/color][/TH][TH][center][IMG WIDTH=10 HEIGHT=20]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][/center][/TH][TH][center][IMG WIDTH=72 HEIGHT=72]https://zahalski.dev/upload/awz.load.ai/80dnez3hq8.png[/IMG][/center]
+
+[center][b]Журнал в админке[/b][/center][color=#8b93b3]срабатывания и забаненные адреса - в таблицах админ-панели.[/color][/TH][/TR][/TABLE]
+[/center]
+
+[center][IMG WIDTH=800 HEIGHT=447]https://zahalski.dev/upload/awz.load.ai/qy9yracj5e.png[/IMG][/center]
+
+[center][size=18pt][b]От чего защищает модуль[/b][/size][/center]
+[center]
+[TABLE]
+[TR][TD][IMG WIDTH=135 HEIGHT=1]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][/TD][TD][IMG WIDTH=135 HEIGHT=1]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][/TD][/TR]
+[TR][TD][center][IMG WIDTH=72 HEIGHT=72]https://zahalski.dev/upload/awz.load.ai/tor0kdvczy.png[/IMG][/center][/TD][TD][center][b]Боты-парсеры[/b][/center][/TD][/TR]
+[TR][TD][center][IMG WIDTH=72 HEIGHT=72]https://zahalski.dev/upload/awz.load.ai/12r04n119s.png[/IMG][/center][/TD][TD][center][b]Брутфорс и подбор[/b][/center][/TD][/TR]
+[TR][TD][center][IMG WIDTH=72 HEIGHT=72]https://zahalski.dev/upload/awz.load.ai/5xv9wx4kln.png[/IMG][/center][/TD][TD][center][b]HTTP-флуд[/b][/center][/TD][/TR]
+[TR][TD][center][IMG WIDTH=72 HEIGHT=72]https://zahalski.dev/upload/awz.load.ai/qegte3m1ug.png[/IMG][/center][/TD][TD][center][b]DDoS-нагрузка[/b][/center][/TD][/TR]
+[/TABLE]
+[/center]
+
+
+[center][size=18pt][b]Основные возможности модуля[/b][/size]
+[IMG WIDTH=225 HEIGHT=9]https://zahalski.dev/upload/awz.load.ai/lv1iyow5dj.png[/IMG][/center]
+
+[center][size=13pt][b]1. Паттерны User-Agent[/b][/size][/center]
+[center]
+[TABLE]
+[TR][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=44 HEIGHT=44]https://zahalski.dev/upload/awz.load.ai/p52mgbcv2l.png[/IMG][/TD][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG]Список шаблонов: запросы, совпавшие с паттерном User-Agent, блокируются[/TD][/TR]
+[TR][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=44 HEIGHT=44]https://zahalski.dev/upload/awz.load.ai/p52mgbcv2l.png[/IMG][/TD][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG]Парсеры, сканеры и другая автоматика отсекаются по агенту запроса[/TD][/TR]
+[TR][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=44 HEIGHT=44]https://zahalski.dev/upload/awz.load.ai/p52mgbcv2l.png[/IMG][/TD][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG]Управление с одного экрана настроек - без правки кода[/TD][/TR]
+[/TABLE]
+[/center]
+
+[center][IMG WIDTH=800 HEIGHT=447]https://zahalski.dev/upload/awz.load.ai/8tbec6fiht.png[/IMG][/center]
+
+[center][size=13pt][b]2. Бан по IP и журнал[/b][/size][/center]
+[center]
+[TABLE]
+[TR][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=44 HEIGHT=44]https://zahalski.dev/upload/awz.load.ai/8bn6ilvsaq.png[/IMG][/TD][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG]Нежелательные IP-адреса блокируются адресно[/TD][/TR]
+[TR][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=44 HEIGHT=44]https://zahalski.dev/upload/awz.load.ai/8bn6ilvsaq.png[/IMG][/TD][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG]Все срабатывания фиксируются в журнале админ-панели[/TD][/TR]
+[TR][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=44 HEIGHT=44]https://zahalski.dev/upload/awz.load.ai/8bn6ilvsaq.png[/IMG][/TD][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG]Таблица забаненных адресов для разбора атак[/TD][/TR]
+[/TABLE]
+[/center]
+
+[center][IMG WIDTH=800 HEIGHT=447]https://zahalski.dev/upload/awz.load.ai/clx00be5jp.png[/IMG][/center]
+
+[center][size=13pt][b]3. Отражение DDoS[/b][/size][/center]
+[center]
+[TABLE]
+[TR][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=44 HEIGHT=44]https://zahalski.dev/upload/awz.load.ai/9vqeigg7sp.png[/IMG][/TD][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG]Вредоносный трафик отсекается до отдачи страниц сайта[/TD][/TR]
+[TR][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG][IMG WIDTH=44 HEIGHT=44]https://zahalski.dev/upload/awz.load.ai/9vqeigg7sp.png[/IMG][/TD][TD][IMG WIDTH=10 HEIGHT=10]https://zahalski.dev/upload/awz.load.ai/4zhdkguvu3.png[/IMG]Нагрузка на хостинг снижается при всплесках запросов[/TD][/TR]
+[/TABLE]
+[/center]
+
+[center][IMG WIDTH=800 HEIGHT=447]https://zahalski.dev/upload/awz.load.ai/1le3bot9uz.png[/IMG][/center]
+
