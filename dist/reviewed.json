@@ -1,6 +1,6 @@
 {
   "success": true,
-  "requestId": "awz.banobots-1795396260",
+  "requestId": "awz.banobots-1795433519",
   "data": {
     "vulnerabilities": [
       {
@@ -8,7 +8,7 @@
         "line": "1-31",
         "type": "Information Disclosure",
         "severity": "medium",
-        "description": "Подтверждено: административная страница списка блокировок не проверяет права доступа к модулю awz.banobots. Файл подключает prolog_admin_before.php (требует только факта авторизации в админзоне /bitrix/admin/) и включает check_awz_admin.php:9-44, который лишь проверяет установку модуля awz.admin через Loader::includeModule('awz.admin') и НЕ проверяет права пользователя на работу с баноботами. Любое лицо, авторизованное в админ-панели Bitrix без специфического права на awz.banobots (например, обычный зарегистрированный пользователь сайта), открывает /bitrix/admin/awz_banobots_ban_list.php и видит полный список блокировок: IP-адреса посетителей, User-Agent, посещённые страницы (PAGE), REFERER и даты — данные всех посетителей сайта, включая не забаненных ранее. Записи рендерятся через внешний awz.admin IList → CAdminUiList::AddRow (экранирование на стороне списка), stored XSS не подтверждается; проблема — именно чтение чувствительных данных. Групповые операции удаления/редактирования гейтируются $POST_RIGHT=='W', который на странице не установлен (lib/ilist.php:262 в awz.admin), поэтому эксплуатация ограничена чтением. Меню admin/menu.php скрывает пункт меню по правам AccessController::isViewRight(), но файл доступен по прямому URL.",
+        "description": "Подтверждено: административная страница списка блокировок не проверяет права доступа к модулю awz.banobots. Файл подключает prolog_admin_before.php (требует только факта авторизации в админзоне /bitrix/admin/) и включает check_awz_admin.php:9-44, который лишь проверяет установку модуля awz.admin через Loader::includeModule('awz.admin') и НЕ проверяет права пользователя на работу с баноботами. Любое лицо, авторизованное в админ-панели Bitrix без специфического права на awz.banobots (например, обычный зарегистрированный пользователь сайта), открывает /bitrix/admin/awz_banobots_ban_list.php и видит полный список блокировок: IP-адреса посетителей, User-Agent, посещённые страницы (PAGE), REFERER и даты — данные всех посетителей сайта, включая не забаненных ранее. Меню admin/menu.php скрывает пункт меню по правам AccessController::isViewRight(), но файл доступен по прямому URL.",
         "recommendation": "Перед выводом страницы добавить проверку прав доступа к модулю: AccessController::isViewRight() или $APPLICATION->GetGroupRight('awz.banobots'), при отсутствии прав — $APPLICATION->AuthForm('ACCESS_DENIED') и die(). Дополнительно установить POST_RIGHT для корректной работы действий списка.",
         "fix": "Before:\nif(file_exists(__DIR__. DIRECTORY_SEPARATOR.'check_awz_admin.php')){\n    require_once('check_awz_admin.php');\n}elseif(!Loader::includeModule('awz.admin')){\n    return;\n}\n\nAfter:\nuse Awz\\Banobots\\Access\\AccessController;\nif(file_exists(__DIR__. DIRECTORY_SEPARATOR.'check_awz_admin.php')){\n    require_once('check_awz_admin.php');\n}elseif(!Loader::includeModule('awz.admin')){\n    return;\n}\n\nif(!AccessController::isViewRight()){\n    $APPLICATION->AuthForm(Loc::getMessage('ACCESS_DENIED'));\n    die();\n}\n$POST_RIGHT = $APPLICATION->GetGroupRight($module_id);",
         "reviewed": {
@@ -24,22 +24,24 @@
           "rationale": "Severity left unchanged after review; no stronger Bitrix/BUS-specific downgrade condition was identified from the journal text alone."
         },
         "partner_disposition": {
-          "status": "accepted_risk",
-          "note": "",
+          "status": "false_positive",
+          "note": "Страница видно, видна ошибка, на данных доп фильтр id<0",
           "author": "Andrew Zahalski",
-          "updated_at": "2026-11-22T22:27:53+00:00"
+          "updated_at": "2026-11-23T08:35:05+00:00"
         }
       }
     ],
-    "summary": "Обнаружена 1 уязвимость в 1 файле при анализе 56 файлов модуля awz.banobots v1.0.7. Максимальная severity: medium. Прежняя находка IDOR/доступ без проверки прав (ban_list.php) НЕ воспроизводилась в предыдущих версиях из-за временного присутствия AccessController::isViewRight(); в текущей сборке 1.0.7 она восстановлена после того, как проверка была убрана. Три прежние low-находки (Path Traversal в путях логов, Stored XSS через sanitizeLogValue, ReDoS в maskMatch) больше не воспроизводятся: Path Traversal полностью закрыт новой логикой в lib/handlers.php:160-173 (относительные пути отбрасываются), sanitizeLogValue теперь вырезает < и > (строка 85), regex паттерн защищён preg_quote. Recon сигналы (ORM exec(), eval()-строки дефолтов, фиксированные include/require, LocalRedirect на самосформированный saveUrl) осознанно отклонены.",
+    "summary": "Обнаружена 1 уязвимость в 1 файле при анализе 56 файлов модуля awz.banobots v1.0.8. Максимальная severity: medium. Recon сигналы: Bitrix Controller ajax.php имеет правильные prefilters (Authentication+HttpMethod+Csrf) — безопасно. Regex injection (lib/handlers.php:38) — шаблон собирается из опций через preg_quote, не инъекция. Sink OS command (usermodel.php:25,59) — ORM ->exec(), а не shell exec, осознанно отклонён. Sink SQL (install/index.php, lib/access/handlers.php) — RunSQLBatch при установке безопасен, SqlHelper с (int) приведением, осознанно отклонён. Sink code exec (options.php:301) — PHP-тег в недостижимом блоке <?if(false){?>, осознанно отклонён. Sink file ops (lib/handlers.php) — пути логов защищены проверкой web-root (handlers.php:160-173), значения санитизируются sanitizeLogValue. Open Redirect (options.php:73,88) — LocalRedirect на самосформированный URL, контроль не требуется. CSRF (options.php:59) — check_bitrix_sessid() присутствует. Единственная воспроизведённая находка — Information Disclosure в ban_list.php.",
     "scannedFiles": 56,
     "riskLevel": "medium",
     "auditedFiles": [
       ".settings.php",
+      "include.php",
+      "options.php",
+      "updater.php",
       "admin/ban_list.php",
       "admin/check_awz_admin.php",
       "admin/menu.php",
-      "include.php",
       "install/index.php",
       "install/solution.php",
       "install/unstep.php",
@@ -50,13 +52,24 @@
       "lib/access/accesscontroller.php",
       "lib/access/handlers.php",
       "lib/access/model/usermodel.php",
+      "lib/access/model/basemodel.php",
+      "lib/access/component/configpermissions.php",
       "lib/access/custom/actiondictionary.php",
       "lib/access/custom/componentconfig.php",
+      "lib/access/custom/helper.php",
+      "lib/access/custom/permissiondictionary.php",
+      "lib/access/custom/roledictionary.php",
       "lib/access/permission/rulefactory.php",
+      "lib/access/permission/roleutil.php",
+      "lib/access/permission/rules/rightedit.php",
+      "lib/access/permission/rules/rightview.php",
+      "lib/access/permission/rules/settedit.php",
+      "lib/access/permission/rules/settview.php",
+      "lib/access/tables/permission.php",
+      "lib/access/tables/role.php",
+      "lib/access/tables/rolerelation.php",
       "lib/tables/ban.php",
-      "lib/tables/adminpages/banlist.php",
-      "options.php",
-      "updater.php"
+      "lib/tables/adminpages/banlist.php"
     ],
     "reviewSummary": {
       "reviewedAt": "2026-11-23",
@@ -96,7 +109,7 @@
       ]
     },
     "feedbackSummary": {
-      "updatedAt": "2026-11-22T22:27:53+00:00",
+      "updatedAt": "2026-11-23T08:35:05+00:00",
       "applied": 1
     }
   }
