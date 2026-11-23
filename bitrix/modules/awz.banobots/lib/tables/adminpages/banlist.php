@@ -6,6 +6,8 @@ use Bitrix\Main\Localization\Loc;
 use Awz\Admin\IList;
 use Awz\Admin\IParams;
 use Awz\Admin\Helper;
+use Awz\Banobots\Access\AccessController;
+use Awz\Banobots\Access\Custom\ActionDictionary;
 
 Loc::loadMessages(__FILE__);
 
@@ -13,12 +15,22 @@ class BanList extends IList implements IParams {
 
     public function __construct($params){
         parent::__construct($params);
+        if(!AccessController::isViewSettings()){
+            $this->getAdminList()->arGroupErrors[] = ["Нет прав на просмотр списка блокировок"];
+        }
+        if(AccessController::isEditSettings()){
+            global $POST_RIGHT;
+            $POST_RIGHT = 'W';
+        }
     }
 
     public function trigerGetRowListAdmin($row){
     }
 
     public function trigerInitFilter(){
+        if(!AccessController::isEditSettings()){
+            $this->filter['<ID'] = 0;
+        }
     }
 
     public function trigerGetRowListActions(array $actions): array
