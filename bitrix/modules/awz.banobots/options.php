@@ -76,7 +76,7 @@ if ($request->getRequestMethod()==='POST' && AccessController::isEditSettings() 
 if ($request->getRequestMethod()==='POST' && AccessController::isEditSettings() && $request->get('Update'))
 {
     $optionNames = array(
-        'BAN_ENABLED', 'COUNTRY_MODE', 'COUNTRY_ALLOW_LIST', 'COUNTRY_DENY_LIST',
+        'BAN_ENABLED', 'BAN_SUBNET', 'COUNTRY_MODE', 'COUNTRY_ALLOW_LIST', 'COUNTRY_DENY_LIST',
         'IP_WHITE_LIST', 'BOT_BLACK_LIST', 'BOT_WHITE_LIST', 'URL_FILTER',
         'LOG_FILE_BAN', 'LOG_FILE_BOTS', 'LOG_FILE_COUNTRY', 'BAN_UNTIL_DATE', 'LOG_MAX_SIZE_MB', 'BAN_DAYS',
         'BAN_EMPTY_UA', 'BAN_SCANNER_PATHS', 'SCANNER_PATHS', 'BAN_SUSPECT_QUERY', 'SUSPECT_QUERY_PATTERNS'
@@ -177,6 +177,15 @@ $tabControl->Begin();
                     <?$valDays = Option::get($module_id, "BAN_DAYS", "0", "");?>
                     <input type="text" size="4" name="BAN_DAYS" value="<?=htmlspecialcharsbx($valDays)?>">
                 </span>
+            </td>
+        </tr>
+
+        <tr>
+            <td><?=Loc::getMessage('AWZ_BANOBOTS_OPT_BAN_SUBNET')?></td>
+            <td>
+                <?$val = Option::get($module_id, "BAN_SUBNET", "Y", "");?>
+                <input type="checkbox" value="Y" name="BAN_SUBNET" <?if ($val=="Y") echo "checked";?>>
+                <div style="margin-top:5px;color:#666;"><?=Loc::getMessage('AWZ_BANOBOTS_OPT_BAN_SUBNET_DESC')?></div>
             </td>
         </tr>
 

@@ -14,6 +14,8 @@ $MESS['AWZ_BANOBOTS_OPT_BANS_COUNT'] = "Заблокировано";
 $MESS['AWZ_BANOBOTS_OPT_SHOW_DESC'] = "Данный модуль предназначен для блокировки ботов и ограничения доступа по странам - <a target=\"_blank\" href=\"https://zahalski.dev/modules/awz.banobots/\">Документация</a>.";
 $MESS['AWZ_BANOBOTS_OPT_SAVED'] = "Настройки сохранены";
 $MESS['AWZ_BANOBOTS_OPT_BAN_ENABLED'] = "Блокировка включена";
+$MESS['AWZ_BANOBOTS_OPT_BAN_SUBNET'] = "Блокировка по подсети";
+$MESS['AWZ_BANOBOTS_OPT_BAN_SUBNET_DESC'] = "Блокировать всю подсеть /24 (256 IP): если заблокирован один IP из подсети, блокируются все IP этой подсети";
 $MESS['AWZ_BANOBOTS_OPT_COUNTRY_MODE'] = "Режим блокировки по странам";
 $MESS['AWZ_BANOBOTS_OPT_COUNTRY_MODE_ALLOW'] = "Белый список (банить все страны, кроме указанных)";
 $MESS['AWZ_BANOBOTS_OPT_COUNTRY_MODE_DENY'] = "Черный список (банить только указанные страны)";

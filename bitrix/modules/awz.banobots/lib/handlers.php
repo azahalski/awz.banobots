@@ -210,16 +210,33 @@ class Handlers
         if ($ip !== '') {
             try {
                 $banDays = (int)Option::get(self::MODULE_ID, 'BAN_DAYS', '0', "");
-                $arFilter = array('=IP' => $ip, '=ACTIVE' => 'Y');
+                $arFilter = array('=ACTIVE' => 'Y');
                 if ($banDays > 0) {
                     $arFilter['>=DATE_BAN'] = \Bitrix\Main\Type\DateTime::createFromTimestamp(time() - $banDays * 86400);
+                }
+                $banned = false;
+                $subnetMode = Option::get(self::MODULE_ID, 'BAN_SUBNET', 'Y', "") === 'Y';
+                if ($subnetMode) {
+                    // блокировка по подсети /24 (256 IP): один запрос LIKE покрывает и точный IP
+                    $ipParts = explode('.', $ip);
+                    if (count($ipParts) === 4 && ctype_digit($ipParts[0]) && ctype_digit($ipParts[1]) && ctype_digit($ipParts[2])) {
+                        $subnet = $ipParts[0].'.'.$ipParts[1].'.'.$ipParts[2].'.';
+                        // ORM: 'IP' => '14.169.80.%' => SQL: IP LIKE '14.169.80.%'
+                        $arFilter['IP'] = $subnet.'%';
+                    } else {
+                        $arFilter['=IP'] = $ip;
+                    }
+                } else {
+                    // точное совпадение IP
+                    $arFilter['=IP'] = $ip;
                 }
                 $dbBan = Tables\BanTable::getList(array(
                     'filter' => $arFilter,
                     'select' => array('ID'),
                     'limit' => 1
                 ));
-                if ($dbBan->fetch()) {
+                $banned = (bool)$dbBan->fetch();
+                if ($banned) {
                     self::incrementBlockedRequests();
                     header('HTTP/1.1 403 Forbidden');
                     die('Access denied. Ban');
