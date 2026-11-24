@@ -54,7 +54,7 @@ $aTabs[] = array(
 $saveUrl = $APPLICATION->GetCurPage(false).'?mid='.htmlspecialcharsbx($module_id).'&lang='.LANGUAGE_ID.'&mid_menu=1';
 $tabControl = new CAdminTabControl("tabControl", $aTabs);
 
-if ($request->getRequestMethod()==='POST' && AccessController::isEditSettings() && ($request->get('ClearBans') || $request->get('Update')))
+if ($request->getRequestMethod()==='POST')
 {
     if (!check_bitrix_sessid())
     {

@@ -4,16 +4,16 @@
     "code": "awz.banobots"
   },
   "current_state": {
-    "status": "needs_review",
-    "last_run_id": "awz.banobots-1795433519",
+    "status": "ready_for_submission",
+    "last_run_id": "awz.banobots-1795504144",
     "archive_sha256": null,
     "open_findings": 0,
     "blocking_findings_open": 0,
-    "false_positive_findings": 1,
+    "false_positive_findings": 0,
     "accepted_risk_findings": 0,
-    "fixed_findings": 0,
+    "fixed_findings": 2,
     "removed_findings": 0,
-    "total_findings": 1
+    "total_findings": 2
   },
   "runs": [
     {
@@ -32,6 +32,38 @@
         "reopened_findings": 0,
         "resolved_since_previous_run": 0
       }
+    },
+    {
+      "run_id": "awz.banobots-1795503978",
+      "created_at": "2026-11-24T04:07:33+00:00",
+      "archive_sha256": null,
+      "scanner_request_id": "awz.banobots-1795503978",
+      "input_summary": "Обнаружено 1 уязвимость в 1 файле при анализе 28 файлов модуля awz.banobots. Максимальная severity: medium.\n\nОтклонённые сигналы:\n- Regex injection (lib/handlers.php:37): отклонено — паттерс собирается через str_replace+preg_quote($patternLower, '/') перед передачей в preg_match; subject ($_SERVER) не контролируется атакующим напрямую.\n- OS command (lib/access/model/usermodel.php:25,59): отклонено — ->exec() это ORM Query::exec(), возвращающий Result object, не shell-команда.\n- File ops on variable (lib/handlers.php:95/105/114): отклонено — путь проходит isAllowedLogFile(только .txt/.log), проверку на docRoot (путь должен быть вне web-root), sanitizeLogValue для содержания, LOCK_EX для атомарности.\n- SQL (lib/access/handlers.php:15): отклонено — используется Application::getConnection()->getSqlHelper()->getInsertIgnore() с заранее приведёнными к int значениями.\n- Include dynamic: отклонено — все include используют статические пути (__DIR__ или константные строки).\n- Auth Bypass: отклонено — options.php использует AccessController для всех state-changing действий; ajax.php использует Engine Controller с Authentication + HttpMethod POST + Csrf prefilters.\n- Open Redirect (options.php:73,88): отклонено — LocalRedirect использует $saveUrl = GetCurPage(false).'?mid=...&lang='.LANGUAGE_ID, который начинается с '/' без пользовательского URL-параметра.",
+      "summary": {
+        "current_scan_findings": 1,
+        "severity_counts": {
+          "medium": 1
+        },
+        "new_findings": 1,
+        "still_open_findings": 0,
+        "reopened_findings": 0,
+        "resolved_since_previous_run": 1
+      }
+    },
+    {
+      "run_id": "awz.banobots-1795504144",
+      "created_at": "2026-11-24T04:09:39+00:00",
+      "archive_sha256": null,
+      "scanner_request_id": "awz.banobots-1795504144",
+      "input_summary": "Повторный скан модуля awz.banobots после исправления: уязвимостей не обнаружено (0 находок), максимальная severity: none.\n\nПодтверждение исправления CSRF (options.php:57-64): раньше check_bitrix_sessid() вызывался только внутри условия (ClearBans || Update), теперь проверка выполняется при ЛЮБОМ POST-запросе до всех state-changing веток. Трассировка POST-веток: (1) ветка Update (строки 76-89) и ветка ClearBans (строки 66-74) — обе покрыты безусловной sessid-проверкой на строках 57-64, плюс AccessController::isEditSettings(); (2) ветка IFRAME_TYPE==='SIDE_SLIDER' (строки 20-25) POST-обработки не содержит — только подключает prolog_admin_after.php/moduleright.php и завершает выполнение через CMain::finalActions()/die(), записи опций и работа с БД в ней отсутствуют, CSRF-риск неприменим. Скрытые поля формы bitrix_sessid_post() присутствуют (строка 95). Исправление подтверждено, находка больше не воспроизводится.\n\nОтклонённые recon-сигналы (все перепроверены по текущему коду):\n- Regex injection (lib/handlers.php:37-38): отклонено — PCRE-паттерн собирается через preg_quote($patternLower, '/') со str_replace для '*', subject — $_SERVER-значения, не контролируемые атакующим как паттерн; модификаторы фиксированы ('/u').\n- OS command (lib/access/model/usermodel.php:25,59): отклонено — ->exec() это ORM Query::exec() (выполнение параметризованного ORM-запроса), не shell-команда.\n- File ops on variable (lib/handlers.php:95,105,114): отклонено — путь проходит isAllowedLogFile (только .txt/.log), обязательный абсолютный путь с запретом всего внутри web-root (строки 159-178), содержимое через sanitizeLogValue (удаление тегов/кавычек/управляющих символов), запись с LOCK_EX и лимитом размера.\n- SQL (lib/access/handlers.php:15-31): отклонено — значения приведены к (int), формируются через getInsertIgnore с константной структурой '(USER_ID,PROVIDER_ID,ACCESS_CODE)'; источник — b_user/groups из БД, а не запрос.\n- Include/require по переменной (options.php, admin/ban_list.php и др.): отклонено — все пути статические ($_SERVER['DOCUMENT_ROOT'] с константными суффиксами, __DIR__);\n- Auth Bypass: отклонено — options.php проверяет AccessController::isViewSettings()/isEditSettings() + check_bitrix_sessid(); ajax.php использует Engine Controller с prefilters Authentication + HttpMethod(POST) + Csrf для save/delete и проверкой AccessController::can() в processBeforeAction.\n- Open Redirect (options.php:73,88): отклонено — LocalRedirect использует $saveUrl = GetCurPage(false).'?mid='.htmlspecialcharsbx($module_id).'&lang='.LANGUAGE_ID, пользовательские URL-параметры не участвуют (LocalRedirect — не баг по рубрике).\n- Sink: code exec (options.php:301, lib/handlers.php:290): ложное срабатывание — это строковые литералы-дефолты списка подозрительных паттернов, не выполнение кода.",
+      "summary": {
+        "current_scan_findings": 0,
+        "severity_counts": {},
+        "new_findings": 0,
+        "still_open_findings": 0,
+        "reopened_findings": 0,
+        "resolved_since_previous_run": 1
+      }
     }
   ],
   "findings": [
@@ -40,18 +72,15 @@
       "fingerprint": "6ddabb23ec5616323d4f2e58a3f9974d",
       "type": "Information Disclosure",
       "severity": "medium",
-      "status": "false_positive",
+      "status": "fixed",
       "first_seen_run_id": "awz.banobots-1795433519",
       "last_seen_run_id": "awz.banobots-1795433519",
-      "resolved_run_id": null,
+      "resolved_run_id": "awz.banobots-1795503978",
       "original_location": {
         "file": "admin/ban_list.php",
         "line": "1-31"
       },
-      "current_location": {
-        "file": "admin/ban_list.php",
-        "line": "1-31"
-      },
+      "current_location": null,
       "latest_vulnerability": {
         "file": "admin/ban_list.php",
         "line": "1-31",
@@ -76,7 +105,7 @@
           "status": "false_positive",
           "note": "Страница видно, видна ошибка, на данных доп фильтр id<0",
           "author": "Andrew Zahalski",
-          "updated_at": "2026-11-23T08:35:05+00:00"
+          "updated_at": "2026-11-23T09:56:15+00:00"
         }
       },
       "events": [
@@ -97,8 +126,89 @@
           "status": "false_positive",
           "note": "Страница видно, видна ошибка, на данных доп фильтр id<0",
           "author": "Andrew Zahalski"
+        },
+        {
+          "run_id": "awz.banobots-1795433519",
+          "event": "partner_disposition_updated",
+          "at": "2026-11-23T09:56:15+00:00",
+          "status": "false_positive",
+          "note": "Страница видно, видна ошибка, на данных доп фильтр id<0",
+          "author": "Andrew Zahalski"
+        },
+        {
+          "run_id": "awz.banobots-1795503978",
+          "event": "resolved",
+          "at": "2026-11-24T04:07:33+00:00",
+          "status": "fixed"
         }
-      ]
+      ],
+      "resolution": {
+        "type": "not_reproduced_after_rescan",
+        "resolved_in_run": "awz.banobots-1795503978",
+        "reason": "The reviewed scan no longer reports a matching finding for the current archive."
+      }
+    },
+    {
+      "journal_finding_id": "JF-00002",
+      "fingerprint": "784605e3c485756e0ac3eef984277010",
+      "type": "CSRF",
+      "severity": "medium",
+      "status": "fixed",
+      "first_seen_run_id": "awz.banobots-1795503978",
+      "last_seen_run_id": "awz.banobots-1795503978",
+      "resolved_run_id": "awz.banobots-1795504144",
+      "original_location": {
+        "file": "options.php",
+        "line": "57"
+      },
+      "current_location": null,
+      "latest_vulnerability": {
+        "file": "options.php",
+        "line": "57",
+        "type": "CSRF",
+        "severity": "medium",
+        "description": "Подтверждена CSRF: обработчик POST в options.php проверяет AccessController::isEditSettings(), но проверка check_bitrix_sessid() (строка 59) находится внутри условия, которое требует наличия ClearBans или Update. При отправке POST только с параметром ClearBans=Y (без Update) условие строки 57 не выполняется, CSRF-проверка пропускается. Атакующий может заставить администратора с правами MODULE_SETT_EDIT отправить форму на поддельный сайт, которая обновит любые опции модуля через блок обновления опций (строки 76–89), где значения читаются напрямую из $request->get($optName) для всех optionNames.",
+        "recommendation": "Вынести check_bitrix_sessid() за пределы условия по ClearBans/Update — проверить токен при любой POST-запросе от авторизованного пользователя с правами редактирования. Либо использовать Engine\\Controller для всех state-changing операций с prefilters включая ActionFilter\\Csrf().",
+        "fix": {
+          "before": "if ($request->getRequestMethod()==='POST' && AccessController::isEditSettings() && ($request->get('ClearBans') || $request->get('Update')))\n{\n    if (!check_bitrix_sessid()) {\n        $APPLICATION->AuthForm(Loc::getMessage('ACCESS_DENIED'));\n        die();\n    }\n}",
+          "after": "if ($request->getRequestMethod()==='POST' && AccessController::isEditSettings())\n{\n    if (!check_bitrix_sessid()) {\n        $APPLICATION->AuthForm(Loc::getMessage('ACCESS_DENIED'));\n        die();\n    }\n}"
+        },
+        "reviewed": {
+          "oldSeverity": "medium",
+          "newSeverity": "medium",
+          "changed": false,
+          "category": "csrf-state-change",
+          "versionScope": "current",
+          "version": "current",
+          "currentVersionRelevance": "present-in-current-scan",
+          "action": "add-sessid-and-owner-checks",
+          "confidence": "medium",
+          "rationale": "Kept as medium because the finding describes state change without check_bitrix_sessid; raise only if cross-user deletion or higher-impact state change is confirmed."
+        }
+      },
+      "events": [
+        {
+          "run_id": "awz.banobots-1795503978",
+          "event": "detected",
+          "at": "2026-11-24T04:07:33+00:00",
+          "location": {
+            "file": "options.php",
+            "line": "57"
+          },
+          "status": "open"
+        },
+        {
+          "run_id": "awz.banobots-1795504144",
+          "event": "resolved",
+          "at": "2026-11-24T04:09:39+00:00",
+          "status": "fixed"
+        }
+      ],
+      "resolution": {
+        "type": "not_reproduced_after_rescan",
+        "resolved_in_run": "awz.banobots-1795504144",
+        "reason": "The reviewed scan no longer reports a matching finding for the current archive."
+      }
     }
   ]
 }
