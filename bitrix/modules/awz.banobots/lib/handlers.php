@@ -222,7 +222,7 @@ class Handlers
                     if (count($ipParts) === 4 && ctype_digit($ipParts[0]) && ctype_digit($ipParts[1]) && ctype_digit($ipParts[2])) {
                         $subnet = $ipParts[0].'.'.$ipParts[1].'.'.$ipParts[2].'.';
                         // ORM: 'IP' => '14.169.80.%' => SQL: IP LIKE '14.169.80.%'
-                        $arFilter['%IP'] = $subnet.'%';
+                        $arFilter['IP'] = $subnet.'%';
                     } else {
                         $arFilter['=IP'] = $ip;
                     }

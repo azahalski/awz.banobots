@@ -3,6 +3,7 @@
 namespace Awz\Banobots\Tables;
 
 use Bitrix\Main\ORM\Data\DataManager;
+use Bitrix\Main\ORM\Data\Internal\DeleteByFilterTrait;
 use Bitrix\Main\ORM\Fields\BooleanField;
 use Bitrix\Main\ORM\Fields\DatetimeField;
 use Bitrix\Main\ORM\Fields\IntegerField;
@@ -11,6 +12,8 @@ use Bitrix\Main\Type\DateTime;
 
 class BanTable extends DataManager
 {
+    use DeleteByFilterTrait;
+
     public static function getTableName()
     {
         return 'awz_banobots_ban';
